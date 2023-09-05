@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="MauiTest1.Views.AppShell"
+	   xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	   xmlns:local="clr-namespace:MauiTest1.Views"
+	   Shell.FlyoutBehavior="Flyout"
+	   Loaded="Shell_Loaded">
+	<ShellContent Title="Connect"
+				  ContentTemplate="{DataTemplate local:MwsConnectPage}"
+				  Route="Connect"/>
+	<ShellContent Title="Configure"
+				  ContentTemplate="{DataTemplate local:MwsConfigurationPage}"
+				  Route="Configure"/>
+	<ShellContent Title="Settings"
+				  ContentTemplate="{DataTemplate local:SettingsPage}"
+				  Route="Settings"/>
+</Shell>

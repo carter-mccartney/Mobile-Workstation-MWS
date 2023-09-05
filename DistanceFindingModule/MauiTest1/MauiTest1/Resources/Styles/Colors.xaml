@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+					xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+	<!-- Default Theme Colors -->
+	<Color x:Key="Primary">#443C68</Color>
+	<Color x:Key="Secondary">#635985</Color>
+	<Color x:Key="Tertiary">#18122B</Color>
+	<Color x:Key="Success">#116622</Color>
+	<Color x:Key="Danger">#CD1818</Color>
+	<Color x:Key="Warning">#C69749</Color>
+	<Color x:Key="Info">#144272</Color>
+	<SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+	<SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+	<SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+	<SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
+	<SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
+	<SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>
+	<SolidColorBrush x:Key="InfoBrush" Color="{StaticResource Info}"/>
+
+	<!-- Dark Theme Colors -->
+	<Color x:Key="DarkPrimary">#443C68</Color>
+	<Color x:Key="DarkSecondary">#635985</Color>
+	<Color x:Key="DarkTertiary">#18122B</Color>
+	<Color x:Key="DarkSuccess">#116622</Color>
+	<Color x:Key="DarkDanger">#CD1818</Color>
+	<Color x:Key="DarkWarning">#C69749</Color>
+	<Color x:Key="DarkInfo">#144272</Color>
+	<SolidColorBrush x:Key="DarkPrimaryBrush" Color="{StaticResource DarkPrimary}"/>
+	<SolidColorBrush x:Key="DarkSecondaryBrush" Color="{StaticResource DarkSecondary}"/>
+	<SolidColorBrush x:Key="DarkTertiaryBrush" Color="{StaticResource DarkTertiary}"/>
+	<SolidColorBrush x:Key="DarkSuccessBrush" Color="{StaticResource DarkSuccess}"/>
+	<SolidColorBrush x:Key="DarkDangerBrush" Color="{StaticResource DarkDanger}"/>
+	<SolidColorBrush x:Key="DarkWarningBrush" Color="{StaticResource DarkWarning}"/>
+	<SolidColorBrush x:Key="DarkInfoBrush" Color="{StaticResource DarkInfo}"/>
+
+	<!-- Light Theme Colors -->
+	<Color x:Key="LightPrimary">#7286D3</Color>
+	<Color x:Key="LightSecondary">#FFF2F2</Color>
+	<Color x:Key="LightTertiary">#8EA7E9</Color>
+	<Color x:Key="LightSuccess">#A8DF8E</Color>
+	<Color x:Key="LightDanger">#FF9B9B</Color>
+	<Color x:Key="LightWarning">#FFD966</Color>
+	<Color x:Key="LightInfo">#B0DAFF</Color>
+	<SolidColorBrush x:Key="LightPrimaryBrush" Color="{StaticResource LightPrimary}"/>
+	<SolidColorBrush x:Key="LightSecondaryBrush" Color="{StaticResource LightSecondary}"/>
+	<SolidColorBrush x:Key="LightTertiaryBrush" Color="{StaticResource LightTertiary}"/>
+	<SolidColorBrush x:Key="LightSuccessBrush" Color="{StaticResource LightSuccess}"/>
+	<SolidColorBrush x:Key="LightDangerBrush" Color="{StaticResource LightDanger}"/>
+	<SolidColorBrush x:Key="LightWarningBrush" Color="{StaticResource LightWarning}"/>
+	<SolidColorBrush x:Key="LightInfoBrush" Color="{StaticResource LightInfo}"/>
+
+	<!-- Miscellaneous -->
+	<Color x:Key="White">White</Color>
+	<Color x:Key="Black">Black</Color>
+	<Color x:Key="Gray100">#E1E1E1</Color>
+	<Color x:Key="Gray200">#C8C8C8</Color>
+	<Color x:Key="Gray300">#ACACAC</Color>
+	<Color x:Key="Gray400">#919191</Color>
+	<Color x:Key="Gray500">#6E6E6E</Color>
+	<Color x:Key="Gray600">#404040</Color>
+	<Color x:Key="Gray900">#212121</Color>
+	<Color x:Key="Gray950">#141414</Color>
+	<SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
+	<SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+	<SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
+	<SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
+	<SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
+	<SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
+	<SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
+	<SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
+	<SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
+	<SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+	<Color x:Key="Yellow100Accent">#F7B548</Color>
+	<Color x:Key="Yellow200Accent">#FFD590</Color>
+	<Color x:Key="Yellow300Accent">#FFE5B9</Color>
+	<Color x:Key="Cyan100Accent">#28C2D1</Color>
+	<Color x:Key="Cyan200Accent">#7BDDEF</Color>
+	<Color x:Key="Cyan300Accent">#C3F2F4</Color>
+	<Color x:Key="Blue100Accent">#3E8EED</Color>
+	<Color x:Key="Blue200Accent">#72ACF1</Color>
+	<Color x:Key="Blue300Accent">#A7CBF6</Color>
+</ResourceDictionary>
