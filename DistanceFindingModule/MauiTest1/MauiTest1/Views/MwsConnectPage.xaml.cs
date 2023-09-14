@@ -14,7 +14,7 @@ public partial class MwsConnectPage : ContentPage
         this.BindingContext = this._viewModel = viewModel;
 	}
 
-    private async void Button_Clicked(object sender, EventArgs e)
+    private void Button_Clicked(object sender, EventArgs e)
     {
         this._viewModel.IsRefreshing = true;
     }
