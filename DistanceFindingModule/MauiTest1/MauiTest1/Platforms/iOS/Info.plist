@@ -60,5 +60,9 @@
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string></string>
+	<key>NSBluetoothAlwaysUsageDescription</key>  
+		<string> XXX</string>  
+	<key>NSBluetoothPeripheralUsageDescription</key>  
+		<string> XXX</string>  
 </dict>
 </plist>
