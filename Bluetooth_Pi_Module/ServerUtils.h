@@ -29,37 +29,40 @@
 
 namespace ggk {
 
-struct ServerUtils
-{
-	// Builds the response to the method call `GetManagedObjects` from the D-Bus interface `org.freedesktop.DBus.ObjectManager`
-	static void getManagedObjects(GDBusMethodInvocation *pInvocation);
+	struct ServerUtils
+	{
+		// Builds the response to the method call `GetManagedObjects` from the D-Bus interface `org.freedesktop.DBus.ObjectManager`
+		static void getManagedObjects(GDBusMethodInvocation* pInvocation);
 
-	// WARNING: Hacky code - don't count on this working properly on all systems
-	//
-	// This routine will attempt to parse /proc/cpuinfo to return the CPU count/model. Results are cached on the first call, with
-	// cached results returned on successive calls.
-	//
-	// If this routine fails, it will respond with something reasonable, if not _entirely_ accurate.
-	static std::string getCpuInfo(int16_t &cpuCount);
+		// WARNING: Hacky code - don't count on this working properly on all systems
+		//
+		// This routine will attempt to parse /proc/cpuinfo to return the CPU count/model. Results are cached on the first call, with
+		// cached results returned on successive calls.
+		//
+		// If this routine fails, it will respond with something reasonable, if not _entirely_ accurate.
+		static std::string getCpuInfo(int16_t& cpuCount);
 
-	// Build a variant that meets the standard for the Current Time (0x2A2B) Bluetooth Characteristic standard
-	//
-	// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.current_time.xml
-	static GVariant *gvariantCurrentTime();
+		// Build a variant that meets the standard for the Current Time (0x2A2B) Bluetooth Characteristic standard
+		//
+		// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.current_time.xml
+		static GVariant* gvariantCurrentTime();
 
-	// Build a variant that meets the standard for the Local Time Information (0x2A0F) Bluetooth Characteristic standard
-	//
-	// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.local_time_information.xml
-	static GVariant *gvariantLocalTime();
+		// Build a variant that meets the standard for the Local Time Information (0x2A0F) Bluetooth Characteristic standard
+		//
+		// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.local_time_information.xml
+		static GVariant* gvariantLocalTime();
 
-	static std::string setConnectedName
+		//this is to set the ConnectedName on each setUp so we know what is connected
+		static void setConnectedName(std::string name);
 
-private:
-	//return the connected name
-	std::string connectedName;
-	
-	//need to have a timer to count down to display change the name
-	//
-};
+		static std::string getConnectedName();
+
+	private:
+		//return the connected name
+		std::string connectedName;
+
+		//need to have a timer to count down to display change the name
+		//
+	};
 
 }; // namespace ggk
