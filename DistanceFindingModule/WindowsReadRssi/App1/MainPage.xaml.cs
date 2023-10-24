@@ -78,7 +78,8 @@ namespace App1
 
             // Create a new AdvertisingDevice or update an old one if we've already seen this device
             var deviceData = new AdvertisingDevice();
-            if(localName == "MWS-Pixel 5")
+            if(localName == "Pixel 5" ||
+               localName == "MwsProto")
             {
                 if(this.seenAdvertisements.ContainsKey(addr))
                 {
@@ -129,7 +130,8 @@ namespace App1
             advertisingDevicesBox.Items.Clear();
             foreach(AdvertisingDevice val in vals)
             {
-                if(val.LocalName == "MWS-Pixel 5")
+                if(val.LocalName == "Pixel 5" ||
+                   val.LocalName == "MwsProto")
                 {
                     advertisingDevicesBox.Items.Add(val);
                 }

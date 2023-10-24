@@ -146,7 +146,9 @@ namespace MwsCompanionApp.Objects
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return this.Name.Equals(obj);
+            Mws that = (Mws)obj;
+            return that != null && 
+                   this.Name.Equals(that.Name);
         }
 
         /// <inheritdoc/>

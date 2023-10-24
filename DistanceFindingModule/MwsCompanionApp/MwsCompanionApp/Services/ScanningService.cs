@@ -88,6 +88,9 @@ namespace MwsCompanionApp.Services
 
             // Stop scanning.
             this.StopBluetoothScan();
+
+            // Update the UI.
+            this.RaisePropertyChanged(nameof(this.AvailableConnections));
         }
 
         /// <summary>

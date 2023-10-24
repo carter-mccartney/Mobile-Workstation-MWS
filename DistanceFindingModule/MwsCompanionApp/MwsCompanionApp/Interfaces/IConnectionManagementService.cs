@@ -32,9 +32,9 @@ namespace MwsCompanionApp.Interfaces
         /// Connects to the given MWS.
         /// </summary>
         /// <returns>
-        /// Whether the operation was successful.
+        /// Whether the operation was successful after the task completes.
         /// </returns>
-        bool Connect();
+        Task<bool> Connect();
 
         /// <summary>
         /// Disconnects from the current MWS.

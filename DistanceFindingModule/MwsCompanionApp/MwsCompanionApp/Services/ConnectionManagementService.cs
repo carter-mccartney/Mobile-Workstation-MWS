@@ -43,14 +43,14 @@ namespace MwsCompanionApp.Services
         /// Sends the connection request to the current MWS.
         /// </summary>
         /// <returns>
-        /// Whether the connection was successful.
+        /// Whether the connection was successful after a task.
         /// </returns>
-        private partial bool SendConnectionRequest();
+        private partial Task<bool> SendConnectionRequest();
 
         /// <inheritdoc/>
-        public bool Connect()
+        public async Task<bool> Connect()
         {
-            if(this.SendConnectionRequest())
+            if(await this.SendConnectionRequest())
             {
                 this.CurrentConnection.IsConnected = true;
                 return true;

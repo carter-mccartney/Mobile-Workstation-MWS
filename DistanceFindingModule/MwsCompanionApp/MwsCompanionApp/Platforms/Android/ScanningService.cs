@@ -1,10 +1,14 @@
 ﻿using Android;
 using Android.Bluetooth;
+using Android.Bluetooth.LE;
 using Android.Content;
+using Android.OS;
+using Android.Runtime;
 using Android.Systems;
 using AndroidX.Core.Content;
 using MwsCompanionApp.Interfaces;
 using MwsCompanionApp.Objects;
+using MwsCompanionApp.Platforms.Android.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -54,15 +58,51 @@ namespace MwsCompanionApp.Services
 
         private partial void StartBluetoothScan()
         {
-            this.AvailableConnections.Add(this._services.MwsFactory.Create("MWS-1"));
-            this.AvailableConnections.Add(this._services.MwsFactory.Create("MWS-2"));
-            this.AvailableConnections.Add(this._services.MwsFactory.Create("MWS-3"));
+            // Get bluetooth adapter.
+            BluetoothManager bleManager = (BluetoothManager)MainActivity.Instance.GetSystemService(MainActivity.BluetoothService);
+            if(bleManager != null) 
+            { 
+                // Get advertisement interface.
+                BluetoothLeScanner scanner = bleManager.Adapter.BluetoothLeScanner;
+
+                // Begin scanning.
+                scanner.StartScan(new List<ScanFilter>()
+                                  {
+                                      new ScanFilter.Builder()
+                                                    .SetServiceUuid(ParcelUuid.FromString("CCA85698-A7BE-4E5A-8506-9125CE3D98E8"))
+                                                    .Build()
+                                  },
+                                  new ScanSettings.Builder()
+                                                  .Build(),
+                                  new GenericScanCallback()
+                                  {
+                                      OnScanResultCallback = (callbackType, result) => 
+                                      { 
+                                          this.AvailableConnections.Add(this._services.MwsFactory.Create(result.ScanRecord.DeviceName)); 
+                                      },
+                                      OnBatchScanResultsCallback = null,
+                                      OnScanFailedCallback = null
+                                  });
+            }
         }
 
 
-        private partial void StopBluetoothScan() 
-        { 
-            
+        private partial void StopBluetoothScan()
+        {
+            // Get bluetooth adapter.
+            BluetoothManager bleManager = (BluetoothManager)MainActivity.Instance.GetSystemService(MainActivity.BluetoothService);
+            if(bleManager != null)
+            {
+                App.Current.Dispatcher.Dispatch(() =>
+                {
+                    // Get advertisement interface.
+                    BluetoothLeScanner scanner = bleManager.Adapter.BluetoothLeScanner;
+
+                    // Stop scanning.
+                    scanner.StopScan(new GenericScanCallback());
+                });
+                
+            }
         }
     }
 }

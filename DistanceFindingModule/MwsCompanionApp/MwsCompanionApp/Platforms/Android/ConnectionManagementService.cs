@@ -10,11 +10,18 @@ using Android.App.Roles;
 using static Java.Util.Jar.Attributes;
 using Javax.Security.Auth;
 using MwsCompanionApp.Objects;
+using Android.OS;
+using MwsCompanionApp.Platforms.Android.Handlers;
 
 namespace MwsCompanionApp.Services
 {
     public partial class ConnectionManagementService
     {
+        /// <summary>
+        /// The currently connected device.
+        /// </summary>
+        private BluetoothGatt _connectedDevice;
+
         /// <summary>
         /// The services avaiable.
         /// </summary>
@@ -29,16 +36,77 @@ namespace MwsCompanionApp.Services
         public ConnectionManagementService(ServicesContainer services)
         {
             this._services = services;
+            this._connectedDevice = null;
         }
 
-        private partial bool SendConnectionRequest() 
+        private partial async Task<bool> SendConnectionRequest()
         {
-            return true;
+            // Get bluetooth adapter.
+            BluetoothManager bleManager = (BluetoothManager)MainActivity.Instance.GetSystemService(MainActivity.BluetoothService);
+            if(bleManager == null)
+            { 
+                return false;
+            }
+            else
+            {
+                // The number of delays to wait until quitting.
+                int numberOfTries = 10;
+
+                // Whether scanning is ongoing.
+                bool isScanning = true;
+
+                // Get advertisement interface.
+                BluetoothLeScanner scanner = bleManager.Adapter.BluetoothLeScanner;
+
+                // Begin scanning.
+                scanner.StartScan(new List<ScanFilter>()
+                                  {
+                                      new ScanFilter.Builder()
+                                                    .SetServiceUuid(ParcelUuid.FromString("CCA85698-A7BE-4E5A-8506-9125CE3D98E8"))
+                                                    .SetDeviceName(this._currentConnection.Name)
+                                                    .Build()
+                                  },
+                                  new ScanSettings.Builder().Build(),
+                                  new GenericScanCallback() 
+                                  { 
+                                      OnScanResultCallback = (callbackType, result) => 
+                                      {
+                                          if(this._connectedDevice == null && // Only get first result.
+                                             numberOfTries > 0 && // Quit if tries are exhausted.
+                                             isScanning) // Quit if this block has been entered.
+                                          {
+                                              isScanning = false;
+                                              scanner.StopScan(new GenericScanCallback());
+                                              this._connectedDevice = result.Device.ConnectGatt(MainActivity.Instance,
+                                                                                                false,
+                                                                                                new GenericBluetoothGattCallback());
+                                          }
+                                          else if(numberOfTries <= 0 &&
+                                                  isScanning) 
+                                          {
+                                              scanner.StopScan(new GenericScanCallback());
+                                          }
+                                      },
+                                      OnBatchScanResultsCallback = null,
+                                      OnScanFailedCallback = null
+                                  });
+
+                // Wait to update UI.
+                while(numberOfTries > 0 &&
+                      isScanning) 
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                }
+
+                return this._connectedDevice != null;
+            }
         }
 
         private partial void SendDisconnectionRequest()
         {
-
+            this._connectedDevice.Disconnect();
+            this._connectedDevice.Close();
+            this._connectedDevice = null;
         }
 
         private partial bool SendRenameRequest(string name) 
@@ -60,7 +128,6 @@ namespace MwsCompanionApp.Services
                 BluetoothLeAdvertiser advertiser = bleManager.Adapter.BluetoothLeAdvertiser;
 
                 // Build the advertisement and start advertising.
-                bleManager.Adapter.SetName("MWS-" + bleManager.Adapter.Name);
                 AdvertisingSetParameters advertisingParameters = (new AdvertisingSetParameters.Builder())
                                                                   .SetLegacyMode(true)
                                                                   .SetScannable(true)

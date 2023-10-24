@@ -66,7 +66,7 @@ namespace MwsCompanionApp.ViewModels
             if(this.Services.Permissions.IsBluetoothPermitted &&
                this.Services.ScanningService.CanConnect)
             {
-                await this.Services.ScanningService.Scan(0.5);
+                await this.Services.ScanningService.Scan(5);
                 App.Current.Dispatcher.Dispatch(() =>
                 {
                     this.IsRefreshing = false;

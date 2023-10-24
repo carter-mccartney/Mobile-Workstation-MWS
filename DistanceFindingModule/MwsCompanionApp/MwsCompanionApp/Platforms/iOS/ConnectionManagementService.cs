@@ -25,9 +25,9 @@ namespace MwsCompanionApp.Services
             this._services = services;
         }
 
-        private partial bool SendConnectionRequest()
+        private partial Task<bool> SendConnectionRequest()
         {
-            return true;
+            return Task.Run(() => true);
         }
 
         private partial void SendDisconnectionRequest()
