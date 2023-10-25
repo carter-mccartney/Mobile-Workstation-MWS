@@ -71,7 +71,6 @@ namespace MwsCompanionApp.Services
         private List<EventHandler> _appClosedHandlers;
 
         private event EventHandler<bool> _bluetoothChanged;
-
         /// <inheritdoc/>
         public event EventHandler<bool> BluetoothChanged
         {
@@ -92,7 +91,6 @@ namespace MwsCompanionApp.Services
         private List<EventHandler<bool>> _bluetoothChangedHandlers;
 
         private event EventHandler<UIMessageEventArgs> _uiMessageDispatched;
-
         /// <inheritdoc/>
         public event EventHandler<UIMessageEventArgs> UIMessageDispatched
         {
@@ -112,6 +110,26 @@ namespace MwsCompanionApp.Services
         /// </summary>
         private List<EventHandler<UIMessageEventArgs>> _uiMessageDispatchedHandlers;
 
+        private event EventHandler<SystemNotificationEventArgs> _systemNotificationDispatched;
+        /// <inheritdoc/>
+        public event EventHandler<SystemNotificationEventArgs> SystemNotificationDispatched
+        {
+            add
+            {
+                this._systemNotificationDispatched += value;
+                this._systemNotificationDispatchedHandlers.Add(value);
+            }
+            remove
+            {
+                this._systemNotificationDispatched -= value;
+                this._systemNotificationDispatchedHandlers.Remove(value);
+            }
+        }
+        /// <summary>
+        /// The list of event handlers for the system notification dispatched event.
+        /// </summary>
+        private List<EventHandler<SystemNotificationEventArgs>> _systemNotificationDispatchedHandlers;
+
         /// <summary>
         /// Creates the event service.
         /// </summary>
@@ -122,6 +140,7 @@ namespace MwsCompanionApp.Services
             this._appClosedHandlers = new List<EventHandler>();
             this._bluetoothChangedHandlers = new List<EventHandler<bool>>();
             this._uiMessageDispatchedHandlers = new List<EventHandler<UIMessageEventArgs>>();
+            this._systemNotificationDispatchedHandlers = new List<EventHandler<SystemNotificationEventArgs>>();
         }
 
         /// <inheritdoc/>
@@ -160,6 +179,10 @@ namespace MwsCompanionApp.Services
             {
                 this._uiMessageDispatched -= handler;
             }
+            foreach(EventHandler<SystemNotificationEventArgs> handler in this._systemNotificationDispatchedHandlers) 
+            { 
+                this._systemNotificationDispatched -= handler;
+            }
         }
 
         /// <inheritdoc/>
@@ -172,6 +195,12 @@ namespace MwsCompanionApp.Services
         public void InvokeUIMessageDispatchedEvent(object sender, UIMessageEventArgs e)
         {
             this._uiMessageDispatched?.Invoke(sender, e);
+        }
+
+        /// <inheritdoc/>
+        public void InvokeSystemNotificationDispatchedEvent(object sender, SystemNotificationEventArgs e)
+        {
+            this._systemNotificationDispatched?.Invoke(sender, e);
         }
     }
 }

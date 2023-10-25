@@ -1,4 +1,5 @@
 ﻿using MwsCompanionApp.Interfaces;
+using Plugin.LocalNotification;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -45,7 +46,16 @@ namespace MwsCompanionApp.Services
         }
 
         /// <inheritdoc/>
-        public partial void CheckPermissions();
+        public async Task CheckPermissions() 
+        {
+            // Get system-specific permissions.
+            App.Current.Dispatcher.Dispatch(this.GetSystemPermissions);
+        }
+
+        /// <summary>
+        /// Gets the OS specific permissions.
+        /// </summary>
+        public partial void GetSystemPermissions();
 
         /// <summary>
         /// Raises the property changed event in a streamlined manner.

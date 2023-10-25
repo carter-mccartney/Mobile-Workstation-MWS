@@ -77,9 +77,9 @@ namespace MwsCompanionApp.Services
             this._permissions = permissions;
 
             // Reinitialize services on resume.
-            this.EventService.Resumed += (s, e) =>
+            this.EventService.Resumed += async (s, e) =>
             {
-                this.Permissions.CheckPermissions();
+                await this.Permissions.CheckPermissions();
                 this.ScanningService.Initialize();
             };
         }
@@ -89,7 +89,7 @@ namespace MwsCompanionApp.Services
         /// </summary>
         public async Task InitializeServices()
         {
-            this.Permissions.CheckPermissions();
+            await this.Permissions.CheckPermissions();
             while(!this.Permissions.IsBluetoothPermitted) await Task.Delay(TimeSpan.FromSeconds(1));
             this.ScanningService.Initialize();
             this.ConnectionService.Initialize();

@@ -8,7 +8,7 @@ namespace MwsCompanionApp.Services
 {
     public partial class PermissionsService
     {
-        public partial void CheckPermissions() 
+        public partial void GetSystemPermissions() 
         {
             this.IsBluetoothPermitted = true;
         }

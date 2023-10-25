@@ -13,7 +13,7 @@ namespace MwsCompanionApp.Services
 {
     public partial class PermissionsService
     {
-        public partial void CheckPermissions()
+        public partial void GetSystemPermissions()
         {
             Task.Run(() =>
             {
@@ -21,8 +21,10 @@ namespace MwsCompanionApp.Services
                    ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothConnect) != Android.Content.PM.Permission.Granted ||
                    ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.Bluetooth) != Android.Content.PM.Permission.Granted ||
                    ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothAdmin) != Android.Content.PM.Permission.Granted ||
+                   ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothScan) != Android.Content.PM.Permission.Granted ||
                    ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.AccessCoarseLocation) != Android.Content.PM.Permission.Granted ||
-                   ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothScan) != Android.Content.PM.Permission.Granted)
+                   ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.AccessFineLocation) != Android.Content.PM.Permission.Granted ||
+                   ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.PostNotifications) != Android.Content.PM.Permission.Granted)
                 {
                     MainActivity.Instance.LaunchPermissionRequest(new string[]
                                                                   {
@@ -31,7 +33,9 @@ namespace MwsCompanionApp.Services
                                                                       Manifest.Permission.BluetoothAdvertise,
                                                                       Manifest.Permission.BluetoothScan,
                                                                       Manifest.Permission.AccessCoarseLocation,
-                                                                      Manifest.Permission.BluetoothAdmin
+                                                                      Manifest.Permission.AccessFineLocation,
+                                                                      Manifest.Permission.BluetoothAdmin,
+                                                                      Manifest.Permission.PostNotifications
                                                                   },
                                                                   () =>
                     {
@@ -41,8 +45,10 @@ namespace MwsCompanionApp.Services
                                ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothConnect) != Android.Content.PM.Permission.Granted ||
                                ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.Bluetooth) != Android.Content.PM.Permission.Granted ||
                                ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothAdmin) != Android.Content.PM.Permission.Granted ||
+                               ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothScan) != Android.Content.PM.Permission.Granted ||
                                ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.AccessCoarseLocation) != Android.Content.PM.Permission.Granted ||
-                               ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.BluetoothScan) != Android.Content.PM.Permission.Granted)
+                               ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.AccessFineLocation) != Android.Content.PM.Permission.Granted ||
+                               ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.PostNotifications) != Android.Content.PM.Permission.Granted)
                             {
                                 this._services.EventService.InvokeUIMessageDispatchedEvent(this, new UIMessageEventArgs("Bluetooth permissions are required for application", true));
                                 this.IsBluetoothPermitted = false;

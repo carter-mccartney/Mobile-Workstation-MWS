@@ -2,10 +2,9 @@
 using MwsCompanionApp.ViewModels;
 using MwsCompanionApp.Views;
 using Microsoft.Extensions.Logging;
-using static MwsCompanionApp.MauiProgram;
-using System.Diagnostics;
 using Sharpnado.Tabs;
 using CommunityToolkit.Maui;
+using Plugin.LocalNotification;
 
 namespace MwsCompanionApp;
 
@@ -22,6 +21,7 @@ public static class MauiProgram
                .RegisterServices()
                .RegisterPlatformServices()
                .UseSharpnadoTabs(loggerEnable: false)
+               .UseLocalNotification()
                .ConfigureFonts(fonts =>
                {
                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

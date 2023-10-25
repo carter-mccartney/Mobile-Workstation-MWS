@@ -20,6 +20,6 @@ namespace MwsCompanionApp.Interfaces
         /// <summary>
         /// Checks for all required permissions and requests them if necessary.
         /// </summary>
-        void CheckPermissions();
+        Task CheckPermissions();
     }
 }
