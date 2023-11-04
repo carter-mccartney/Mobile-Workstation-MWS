@@ -101,7 +101,6 @@ namespace MwsCompanionApp.Objects
         /// </summary>
         public void Disconnect() 
         {
-            this.IsConnected = false;
             this.Services.ConnectionService.Disconnect();
         }
 

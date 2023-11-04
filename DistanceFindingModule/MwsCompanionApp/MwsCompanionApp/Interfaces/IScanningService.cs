@@ -29,6 +29,11 @@ namespace MwsCompanionApp.Interfaces
         void Initialize();
 
         /// <summary>
+        /// Resets the scanning service.
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Scans for active MWS units for a given time.
         /// </summary>
         /// <param name="scanLength">

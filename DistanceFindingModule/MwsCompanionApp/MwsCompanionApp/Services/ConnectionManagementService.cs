@@ -70,7 +70,19 @@ namespace MwsCompanionApp.Services
         public void Disconnect()
         {
             this.SendDisconnectionRequest();
-            this.CurrentConnection.IsConnected = false;
+        }
+
+        /// <summary>
+        /// Performs required cleanup on disconnect.
+        /// </summary>
+        public void OnDisconnect() 
+        {
+            App.Current.Dispatcher.Dispatch(() =>
+            {
+                this.CurrentConnection.IsConnected = false;
+                this.CurrentConnection = null;
+                this._services.ScanningService.Reset();
+            });
         }
 
         /// <summary>

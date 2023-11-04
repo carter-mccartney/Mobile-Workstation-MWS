@@ -47,13 +47,6 @@ public partial class ScanningView : ContentView
     private async void Refresh(object sender, EventArgs e)
     {
         await this._viewModel.Refresh();
-
-        // For some reason the itemssource will not update, so doing it manually can work.
-        App.Current.Dispatcher.Dispatch(() =>
-        {
-            this.MwsListView.ItemsSource = null;
-            this.MwsListView.ItemsSource = this._viewModel.Services.ScanningService.AvailableConnections;
-        });
     }
 
     /// <summary>
@@ -84,8 +77,19 @@ public partial class ScanningView : ContentView
         this._viewModel = ((MwsConnectViewModel)this.BindingContext);
         this._viewModel.Services.EventService.BluetoothChanged += this.ClearList;
 
-        // Start loading.
-        this._viewModel.IsRefreshing = true;
+        // Register event to update carousel view on property changed.
+        this._viewModel.Services.ScanningService.PropertyChanged += (s, e) =>
+        {
+            if(e.PropertyName == nameof(this._viewModel.Services.ScanningService.AvailableConnections))
+            {
+                // For some reason the itemssource will not update, so doing it manually can work.
+                App.Current.Dispatcher.Dispatch(() =>
+                {
+                    this.MwsListView.ItemsSource = null;
+                    this.MwsListView.ItemsSource = this._viewModel.Services.ScanningService.AvailableConnections;
+                });
+            }
+        };
     }
 
     /// <summary>

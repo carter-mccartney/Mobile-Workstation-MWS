@@ -79,7 +79,19 @@ namespace MwsCompanionApp.Services
                                               scanner.StopScan(new GenericScanCallback());
                                               this._connectedDevice = result.Device.ConnectGatt(MainActivity.Instance,
                                                                                                 false,
-                                                                                                new GenericBluetoothGattCallback());
+                                                                                                new GenericBluetoothGattCallback() 
+                                                                                                { 
+                                                                                                    OnConnectionStateChangedCallback = (gatt, status, newStatus) => 
+                                                                                                    {
+                                                                                                        if(newStatus == ProfileState.Disconnected ||
+                                                                                                           newStatus == ProfileState.Disconnecting) 
+                                                                                                        {
+                                                                                                            this.OnDisconnect();
+                                                                                                            this._connectedDevice.Close();
+                                                                                                            this._connectedDevice = null;
+                                                                                                        }
+                                                                                                    }
+                                                                                                });
                                           }
                                           else if(numberOfTries <= 0 &&
                                                   isScanning) 
@@ -105,8 +117,6 @@ namespace MwsCompanionApp.Services
         private partial void SendDisconnectionRequest()
         {
             this._connectedDevice.Disconnect();
-            this._connectedDevice.Close();
-            this._connectedDevice = null;
         }
 
         private partial bool SendRenameRequest(string name) 

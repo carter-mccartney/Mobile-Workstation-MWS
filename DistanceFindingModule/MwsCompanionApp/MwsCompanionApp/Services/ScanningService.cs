@@ -65,6 +65,15 @@ namespace MwsCompanionApp.Services
             this.CheckBluetoothStatus();
         }
 
+        /// <inheritdoc/>
+        public void Reset() 
+        {
+            this.AvailableConnections.Clear();
+
+            // Update the UI.
+            this.RaisePropertyChanged(nameof(this.AvailableConnections));
+        }
+
         /// <summary>
         /// Starts scanning for MWS units over bluetooth.
         /// </summary>
