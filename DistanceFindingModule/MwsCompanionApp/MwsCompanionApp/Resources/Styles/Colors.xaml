@@ -3,7 +3,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
 					xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 	<!-- Default Theme Colors -->
-	<Color x:Key="Primary">#18122B</Color>
+	<Color x:Key="Primary">#28223B</Color>
 	<Color x:Key="Secondary">#443C68</Color>
 	<Color x:Key="Tertiary">#101010</Color>
 	<Color x:Key="Success">#116622</Color>
@@ -19,7 +19,7 @@
 	<SolidColorBrush x:Key="InfoBrush" Color="{StaticResource Info}"/>
 
 	<!-- Dark Theme Colors -->
-	<Color x:Key="DarkPrimary">#18122B</Color>
+	<Color x:Key="DarkPrimary">#28223B</Color>
 	<Color x:Key="DarkSecondary">#443C68</Color>
 	<Color x:Key="DarkTertiary">#2B2B2B</Color>
 	<Color x:Key="DarkSuccess">#116622</Color>

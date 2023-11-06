@@ -11,7 +11,8 @@
 	<RefreshView IsRefreshing="{Binding IsRefreshing, 
 		                                Mode=TwoWay, 
 		                                UpdateSourceEventName=PropertyChanged}"
-				 Refreshing="Refresh">
+				 Refreshing="Refresh"
+				 IsEnabled="{Binding Services.ConnectionService.CurrentConnection.CanConnect}">
 		<Grid>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
@@ -28,7 +29,8 @@
 					Clicked="Refresh_Clicked"
 					Margin="0, 0, 10, 10"
 					Grid.Row="1"
-					HorizontalOptions="End"/>
+					HorizontalOptions="End"
+					IsEnabled="{Binding Services.ConnectionService.CurrentConnection.CanConnect}"/>
 			<CarouselView CurrentItem="{Binding Services.ConnectionService.CurrentConnection, 
 												Mode=TwoWay, 
 												UpdateSourceEventName=PropertyChanged}"
@@ -37,7 +39,9 @@
 						  IndicatorView="indicatorView"
 						  Grid.Row="2"
 						  x:Name="MwsListView"
-						  Margin="10">
+						  Margin="10"
+						  IsEnabled="{Binding Services.ConnectionService.CurrentConnection.CanConnect}"
+						  IsSwipeEnabled="{Binding Services.ConnectionService.CurrentConnection.CanConnect}">
 				<CarouselView.EmptyView>
 					<Label Text="There are no available MWS units."
 						   Margin="10"/>
@@ -60,7 +64,8 @@
 										Grid.Row="1"
 										Clicked="Connect_Clicked"
 										class="Success"
-										Margin="10"/>
+										Margin="10"
+										IsEnabled="{Binding CanConnect, Mode=OneWay, UpdateSourceEventName=PropertyChanged}"/>
 								<Rectangle class="Line"/>
 							</VerticalStackLayout>
 						</Border>

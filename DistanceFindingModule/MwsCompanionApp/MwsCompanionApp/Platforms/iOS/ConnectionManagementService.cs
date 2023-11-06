@@ -14,6 +14,11 @@ namespace MwsCompanionApp.Services
         /// </summary>
         private ServicesContainer _services;
 
+        private partial bool IsConnected() 
+        {
+            return false;
+        }
+
         /// <summary>
         /// Creates a connection management service with the given services.
         /// </summary>
@@ -23,11 +28,14 @@ namespace MwsCompanionApp.Services
         public ConnectionManagementService(ServicesContainer services)
         {
             this._services = services;
+            this._isConnectionSetUp = false;
+            this._hasManufacturerBeenConfirmed = false;
+            this._hasModelBeenConfirmed = false;
         }
 
-        private partial Task<bool> SendConnectionRequest()
+        private partial Task SendConnectionRequest()
         {
-            return Task.Run(() => true);
+            return Task.CompletedTask;
         }
 
         private partial void SendDisconnectionRequest()
@@ -35,17 +43,32 @@ namespace MwsCompanionApp.Services
 
         }
 
+        private partial void ReadValue(string serviceUuid, string characteristicUuid)
+        {
+            
+        }
+
+        private partial Task WriteValue(string serviceUuid, string characteristicUuid, byte[] value) 
+        {
+            return Task.CompletedTask;
+        }
+
         private partial bool SendRenameRequest(string name)
         {
             return true;
         }
 
-        private partial bool SetupLocationSharing() 
+        private partial byte[] GenerateSignature() 
+        {
+            return null;
+        }
+
+        private partial bool StartAdvertisingLocation() 
         {
             return true;
         }
 
-        private partial void EndLocationSharing() 
+        private partial void StopAdvertisingLocation() 
         { 
             
         }

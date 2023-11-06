@@ -125,21 +125,27 @@ namespace MwsCompanionApp.Platforms.Android.Handlers
         /// <inheritdoc/>
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)
         {
-            if(OperatingSystem.IsAndroidVersionAtLeast(33))
+            App.Current.Dispatcher.Dispatch(() =>
             {
-                base.OnCharacteristicRead(gatt, characteristic, value, status);
-                this.OnCharacteristicReadCallback?.Invoke(gatt, characteristic, value, status);
-            }
+                if(OperatingSystem.IsAndroidVersionAtLeast(33))
+                {
+                    base.OnCharacteristicRead(gatt, characteristic, value, status);
+                    this.OnCharacteristicReadCallback?.Invoke(gatt, characteristic, value, status);
+                }
+            });
         }
 
         /// <inheritdoc/>
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, [GeneratedEnum] GattStatus status)
         {
-            if(!OperatingSystem.IsAndroidVersionAtLeast(33))
+            App.Current.Dispatcher.Dispatch(() =>
             {
-                base.OnCharacteristicRead(gatt, characteristic, status);
-                this.OnCharacteristicReadLegacyCallback?.Invoke(gatt, characteristic, status);
-            }
+                if(!OperatingSystem.IsAndroidVersionAtLeast(33))
+                {
+                    base.OnCharacteristicRead(gatt, characteristic, status);
+                    this.OnCharacteristicReadLegacyCallback?.Invoke(gatt, characteristic, status);
+                }
+            });
         }
 
         /// <inheritdoc/>

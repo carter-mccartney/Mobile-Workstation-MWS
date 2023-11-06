@@ -32,9 +32,9 @@ namespace MwsCompanionApp.Interfaces
         /// Connects to the given MWS.
         /// </summary>
         /// <returns>
-        /// Whether the operation was successful after the task completes.
+        /// A task representing the asynchronous state of the operation.
         /// </returns>
-        Task<bool> Connect();
+        Task Connect();
 
         /// <summary>
         /// Disconnects from the current MWS.
@@ -45,14 +45,17 @@ namespace MwsCompanionApp.Interfaces
         /// Begins the process of sharing the location with the connected MWS.
         /// </summary>
         /// <returns>
-        /// Whether the operation was successful.
+        /// A task representing the async state of the operation.
         /// </returns>
-        bool StartSharingLocation();
+        Task EnterFollowerMode();
 
         /// <summary>
         /// Ends the process of sharing the location with the connected MWS.
         /// </summary>
-        void StopSharingLocation();
+        /// <returns>
+        /// A task representing the async state of the operation.
+        /// </returns>
+        Task ExitFollowerMode();
 
         /// <summary>
         /// Renames the connected MWS.

@@ -35,6 +35,10 @@
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\mwscompanion.png" BaseSize="300,300" Color="#443C68" />
+		<EmbeddedResource Include="Resources\Images\mwscompanion.png">
+		  <Color>#443C68</Color>
+		  <BaseSize>300,300</BaseSize>
+		</EmbeddedResource>
 		
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\mwscompanionsplash.png" BaseSize="300,300" Color="#443C68" />
@@ -47,6 +51,14 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\mwscompanion.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Images\mwscompanion.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -81,7 +93,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\Images\" />
 	  <Folder Include="Resources\Splash\" />
 	</ItemGroup>
 

@@ -96,7 +96,6 @@ public partial class AppShell : Shell
                                                NotificationCategoryType.Status : 
                                                throw new ArgumentOutOfRangeException("NotificationCategory " + e.Category + " is not specified in handler."),
             Description = e.Description,
-            Image = new NotificationImage() { FilePath = e.IconPath },
             Group = e.Channel,
             Silent = !e.IsUrgent, // Urgent notifications should make a sound.
             Subtitle = e.Subtitle,

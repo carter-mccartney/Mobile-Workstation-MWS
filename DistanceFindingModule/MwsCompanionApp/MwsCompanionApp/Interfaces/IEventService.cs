@@ -167,11 +167,6 @@ namespace MwsCompanionApp.Interfaces
         public string Channel { get; private set; }
 
         /// <summary>
-        /// The path to the icon image for the notification
-        /// </summary>
-        public string IconPath { get; private set; }
-
-        /// <summary>
         /// The category of notification.
         /// </summary>
         public NotificationCategory Category { get; private set; }
@@ -196,9 +191,6 @@ namespace MwsCompanionApp.Interfaces
         /// <param name="channel">
         /// The channel of the notification. This defaults to null.
         /// </param>
-        /// <param name="iconPath">
-        /// The path to the notification icon. This defaults to null.
-        /// </param>
         /// <param name="category">
         /// The category of the notification. This defaults to unspecified.
         /// </param>
@@ -209,7 +201,6 @@ namespace MwsCompanionApp.Interfaces
                                            string description, 
                                            string subtitle = null, 
                                            string channel = null, 
-                                           string iconPath = null, 
                                            NotificationCategory category = NotificationCategory.Unspecified, 
                                            bool isUrgent = false) 
         { 
@@ -217,7 +208,6 @@ namespace MwsCompanionApp.Interfaces
             this.Description = description;
             this.Subtitle = subtitle;
             this.Channel = channel;
-            this.IconPath = iconPath;
             this.Category = category;
             this.IsUrgent = isUrgent;
         }

@@ -37,6 +37,20 @@ namespace MwsCompanionApp.Objects
             } 
         }
 
+        private bool _canConnect;
+        /// <summary>
+        /// Whether a connection can be attempted.
+        /// </summary>
+        public bool CanConnect 
+        {
+            get => this._canConnect;
+            set 
+            {
+                this._canConnect = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         private bool _isConnected;
         /// <summary>
         /// Whether the MWS is connected.
@@ -85,6 +99,7 @@ namespace MwsCompanionApp.Objects
             this.Services = services;
             this.Name = name;
             this.IsConnected = false;
+            this.CanConnect = true;
             this.IsFollowing = false;
         }
 
@@ -93,6 +108,7 @@ namespace MwsCompanionApp.Objects
         /// </summary>
         public void Connect() 
         {
+            this.CanConnect = false;
             this.Services.ConnectionService.Connect();
         }
 
@@ -109,17 +125,7 @@ namespace MwsCompanionApp.Objects
         /// </summary>
         public void BeginFollowing()
         {
-            bool isFollowing = this.Services.ConnectionService.StartSharingLocation();
-            if(isFollowing)
-            {
-                // Update the display.
-                this.IsFollowing = true;
-            }
-            else 
-            {
-                // Notify about the error.
-                this.Services.EventService.InvokeUIMessageDispatchedEvent(this, new UIMessageEventArgs("Error placing " + this.Name + " into follower mode"));
-            }
+            this.Services.ConnectionService.EnterFollowerMode();
         }
 
         /// <summary>
@@ -127,8 +133,7 @@ namespace MwsCompanionApp.Objects
         /// </summary>
         public void StopFollowing() 
         {
-            this.Services.ConnectionService.StopSharingLocation();
-            this.IsFollowing = false;
+            this.Services.ConnectionService.ExitFollowerMode();
         }
 
         /// <summary>
