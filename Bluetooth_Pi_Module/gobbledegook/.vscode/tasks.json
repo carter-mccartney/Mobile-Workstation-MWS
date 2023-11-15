@@ -1,0 +1,16 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Make program",
+            "command": "./configure && make"
+        },
+        {
+            "type": "shell",
+            "label": "Launch",
+            "command": "sudo gdb -q --args ~/Desktop/gobbledegook-master/src/standalone -d",
+            "dependsOn": "Make program"
+        }
+    ],
+    "version": "2.0.0"
+}
