@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MwsCompanionApp.Views.ConnectPage"
+			 xmlns:local="clr-namespace:MwsCompanionApp.Views"
+			 xmlns:converters="clr-namespace:MwsCompanionApp.Infrastructure"
+			 xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             Title="Connect">
+	<ContentPage.Resources>
+		<converters:NotConverter x:Key="NotConverter"/>
+		<converters:ExistsConverter x:Key="ExistsConverter"/>
+	</ContentPage.Resources>
+	<Grid>
+		<Grid IsVisible="{Binding Services.Permissions.IsBluetoothPermitted,
+								  Mode=OneWay,
+								  UpdateSourceEventName=PropertyChanged,
+								  Converter={StaticResource NotConverter}}">
+			<local:NoConnectionView/>
+		</Grid>
+		<Grid IsVisible="{Binding Services.Permissions.IsBluetoothPermitted,
+								  Mode=OneWay,
+								  UpdateSourceEventName=PropertyChanged}">
+			<Grid IsVisible="{Binding Services.ScanningService.CanConnect, 
+									  Mode=OneWay, 
+									  UpdateSourceEventName=PropertyChanged, 
+									  Converter={StaticResource NotConverter}}">
+				<local:NoConnectionView/>
+			</Grid>
+			<Grid IsVisible="{Binding Services.ScanningService.CanConnect, 
+									  Mode=OneWay, 
+									  UpdateSourceEventName=PropertyChanged}">
+				<Grid IsVisible="{Binding Services.ConnectionService.CurrentConnection.IsConnected, 
+										  Mode=OneWay, 
+										  UpdateSourceEventName=PropertyChanged, 
+										  Converter={StaticResource NotConverter},
+										  FallbackValue=True}">
+					<local:ScanningView BindingContext="{Binding}"/>
+				</Grid>
+				<Grid IsVisible="{Binding Services.ConnectionService.CurrentConnection, 
+										  Mode=OneWay, 
+										  UpdateSourceEventName=PropertyChanged, 
+										  Converter={StaticResource ExistsConverter}}">
+					<Grid IsVisible="{Binding Services.ConnectionService.CurrentConnection.IsConnected, 
+											  Mode=OneWay, 
+											  UpdateSourceEventName=PropertyChanged}">
+						<local:ConnectionView BindingContext="{Binding Services.ConnectionService.CurrentConnection}"/>
+					</Grid>
+				</Grid>
+			</Grid>
+		</Grid>
+	</Grid>
+</ContentPage>
