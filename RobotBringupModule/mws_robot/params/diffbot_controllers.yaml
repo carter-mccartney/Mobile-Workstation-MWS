@@ -1,0 +1,100 @@
+# Descriptions for these parameters can be found from the link below:
+# https://github.com/ros-controls/ros2_controllers/blob/humble/diff_drive_controller/src/diff_drive_controller_parameter.yaml
+# Comments for each parameter are mostly taken from the descriptions for the parameter from the link above.
+
+controller_manager:
+  ros__parameters:
+    update_rate: 10  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    diffbot_base_controller:
+      type: diff_drive_controller/DiffDriveController
+
+diffbot_base_controller:
+  ros__parameters:
+
+    # Link names of the left side wheels.
+    left_wheel_names: ["left_wheel_joint"]
+
+    # Link names of the right side wheels.
+    right_wheel_names: ["right_wheel_joint"]
+
+    # Shortest distance between the left and right wheels. 
+    # If this parameter is wrong, the robot will not behave correctly in curves.
+    # The diff_drive_controller will attempt to read the value from the URDF if this parameter is not specified 
+    wheel_separation: 0.297
+    
+    # Radius of a wheel, 
+    # i.e., wheels size, used for transformation of linear velocity into wheel rotations. 
+    # If this parameter is wrong the robot will move faster or slower then expected.
+    # diff_drive_controller will attempt to read the value from the URDF if this parameter is not specified.
+    wheel_radius: 0.033 
+
+    # Correction factor for wheel separation.
+    wheel_separation_multiplier: 1.0
+
+    # Correction factor when radius of left wheels differs from the nominal value in ``wheel_radius`` parameter.
+    left_wheel_radius_multiplier: 1.0
+
+    # Correction factor when radius of right wheels differs from the nominal value in ``wheel_radius`` parameter.
+    right_wheel_radius_multiplier: 1.0
+
+    # Publishing rate (Hz) of the odometry and TF messages.
+    publish_rate: 50.0
+
+    # Name of the frame for odometry. This frame is parent of ``base_frame_id`` when controller publishes odometry.
+    odom_frame_id: odom # Not sure what the name of for the odeom frame will be.
+
+    # Name of the robot's base frame that is child of the odometry frame.
+    base_frame_id: base_link
+
+    # Odometry covariance for the encoder output of the robot for the pose. 
+    # These values should be tuned to your robot's sample odometry data.
+    # These values are typically used to start: ``[0.001, 0.001, 0.001, 0.001, 0.001, 0.01]``.
+    pose_covariance_diagonal : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # Odometry covariance for the encoder output of the robot for the speed. 
+    # These values should be tuned to your robot's sample odometry data. 
+    # These values are typically used to start: ``[0.001, 0.001, 0.001, 0.001, 0.001, 0.01]``.
+    twist_covariance_diagonal: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # If set to true the odometry of the robot will be calculated from the commanded values and not from feedback.
+    open_loop: true
+
+    # Publish transformation between ``odom_frame_id`` and ``base_frame_id``.
+    enable_odom_tf: true
+
+    # Is there position feedback from hardware.
+    position_feedback: false
+
+    # Timeout after which input command on ``cmd_vel`` topic is considered staled.
+    # Units are in seconds.
+    cmd_vel_timeout: 0.5
+
+    # Use stamp from input velocity message to calculate how old the command actually is.
+    use_stamped_vel: false
+
+    # Velocity and acceleration limits
+    # Whenever a min_* is unspecified, default to -max_*
+    # All numeric values are of variable type 'double'.
+    linear.x.has_velocity_limits: true
+    linear.x.has_acceleration_limits: true
+    linear.x.has_jerk_limits: true
+    linear.x.max_velocity: 1.5
+    linear.x.min_velocity: -1.5
+    linear.x.max_acceleration: 0.03
+    linear.x.min_acceleration: -0.03
+    linear.x.max_jerk: 2.0
+    linear.x.min_jerk: -2.0
+
+    angular.z.has_velocity_limits: true
+    angular.z.has_acceleration_limits: true
+    angular.z.has_jerk_limits: true
+    angular.z.max_velocity: 1.5
+    angular.z.min_velocity: -1.5
+    angular.z.max_acceleration: 0.03
+    angular.z.min_acceleration: -0.03
+    angular.z.max_jerk: 2.0
+    angular.z.min_jerk: -2.0
