@@ -23,13 +23,41 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 
+// Contians metrics for current time.
+#include <chrono>
+
+// The last time recorded.
+static std::chrono::time_point<std::chrono::system_clock> lastTime;
+
+// Helper for conversion of time to UTC.
+time_t toUTC(std::tm& timeinfo)
+{
+    time_t tt = timegm(&timeinfo);
+    return tt;
+}
+
+// Helper for creating a date time.
+std::chrono::system_clock::time_point createDateTime(int year, int month, int day, int hour, int minute, int second) // these are UTC values
+{
+    tm timeInfo = tm();
+    timeInfo.tm_year = year - 1900;
+    timeInfo.tm_mon = month - 1;
+    timeInfo.tm_mday = day;
+    timeInfo.tm_hour = hour;
+    timeInfo.tm_min = minute;
+    timeInfo.tm_sec = second;
+    tm time = timeInfo;
+    time_t tt = toUTC(time);
+    return std::chrono::system_clock::from_time_t(tt);
+}
+
 namespace MwsNavigation
 {
     class MwsNavigationNode : public rclcpp::Node
     {
     public:
         // Create a new navigation node.
-        MwsNavigationNode() : Node("mws_navigation")
+        MwsNavigationNode() : Node("mws_navigation_controller")
         {
             // Create objects.
             this->currentPose = std::make_shared<geometry_msgs::msg::Pose>();
@@ -253,16 +281,21 @@ namespace MwsNavigation
 
     void MwsNavigationClient::resultCallback(const GoalHandler::WrappedResult& result)
     {
+        std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
         RCLCPP_INFO(this->get_logger(), "Navigation Stopped");
         switch(result.code) 
         {
             case rclcpp_action::ResultCode::SUCCEEDED:
-                break;
+                return;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
-
-                // Notify user.
-                globalNode->publishMessage("There was a navigation error.");
+                
+                // Notify user if they haven't recently been notified.
+                if(std::chrono::duration_cast<std::chrono::minutes>(currentTime - lastTime).count() > 30)
+                {
+                    lastTime = currentTime;
+                    globalNode->publishMessage("There was a navigation error.");
+                }
 
                 // Retry navigation.
                 this->startNavigating();
@@ -288,6 +321,9 @@ void serviceMain()
 
 int main(int argc, char* argv[])
 {
+    // Set start time.
+    lastTime = createDateTime(1970, 1, 1, 0, 0, 0);
+
     rclcpp::init(argc, argv);
     rclcpp::NodeOptions options;
     globalNode = std::make_shared<MwsNavigationNode>();
