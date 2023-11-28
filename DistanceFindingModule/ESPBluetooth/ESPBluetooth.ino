@@ -6,39 +6,33 @@
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
+#include <BLEUUID.h>
 #include <BLEAdvertisedDevice.h>
 
-uint8_t mac[] = { 0x47, 0x32, 0xee, 0x1f, 0xc6, 0x85 };
 int scanTime = 5; //In seconds
 BLEScan* pBLEScan;
 bool isPaused;
+bool isMeasuring;
 byte i;
 byte total;
-byte limit;
-string connectedName;
-//change string name possibility 
+String connectedName;
 int rssi[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int callibrationConstant = -69;
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) 
     {
-      //add in a parse to a specific UID 
-      BLEAddress address = advertisedDevice.getAddress();
-      //this command will find the specific UUID advertisedDevice.getServiceUUID();
+      const char* c_name = advertisedDevice.getName().c_str();
+      int stringLength = strlen(c_name);
 
-
-      uint8_t* macAddr = (uint8_t*)address.getNative();
-      // if(advertisedDevice.getName().c_str()[0] == 'P' &&
-      //    advertisedDevice.getName().c_str()[1] == 'i' &&
-      //    advertisedDevice.getName().c_str()[2] == 'x' &&
-      //    advertisedDevice.getName().c_str()[3] == 'e' &&
-      //    advertisedDevice.getName().c_str()[4] == 'l' &&
-      //    advertisedDevice.getName().c_str()[5] == ' ' &&
-      //    advertisedDevice.getName().c_str()[6] == '3')
-        if(advertisedDevice.getAddress() == connectedName)
-        //find the RSSI and place here
+      bool doesNameMatch = stringLength == connectedName.length();
+      for(int j = 0; j < stringLength && doesNameMatch; j++)
       {
-        //commented out to avoid issues
-        //Serial.printf("%i\n", advertisedDevice.getRSSI());
+        doesNameMatch = doesNameMatch && c_name[j] == connectedName.charAt(j);
+      }
+      
+      if(doesNameMatch &&
+         advertisedDevice.getServiceUUID().equals(BLEUUID("560D5EE7-2C11-478F-AB58-07211516C261")))
+      {
         rssi[i] = advertisedDevice.getRSSI();
         i++;
         i = i % 16;
@@ -49,12 +43,10 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(9600);
-  //Stream.begin(9600);
-  Serial.println("Scanning...");
   isPaused = true;
+  isMeasuring = false;
   i = 0;
   total = 0;
-  connectedName = "Pixel 3";
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
@@ -70,63 +62,52 @@ void loop() {
     delay(250);
     if(Serial.available() > 0)
     {
-
-      // Pause.
-      //isPaused = false;
       while(Serial.available() > 0)
       {
         String command = Serial.readStringUntil('\n');
         Serial.print(command);
         if(command.compareTo("ID") == 0)
         {
-          // while(Serial.available()> 0 )
-          // {
-          //   Serial.read();
-          // }
-          
-
           Serial.write("\nTwo\n");
           continue;
         }
         else if(command.compareTo("DISTANCE") == 0)
         {
           isPaused = false;
-          limit = 6;
           continue;
         }
-        else if(command.compareTo("CALIBRATE")==0)
+        else if(command.compareTo("CALIBRATE") == 0)
         {
+          // Computes a new callibration value.
           isPaused = false;
-          limit = 16;
           continue;
-          
         }
-        else if(command.indexOf("NAME") > 0)
+        else if(command.compareTo("SETCAL") == 0)
         {
-          connectedName = command.substring(command.indexOf(('E'),command.length()-1));
+          // Gives a known callibration value.
+          callibrationConstant = atoi(command.substring(command.indexOf(('L'), command.length() - 1)).c_str());
           Serial.print("\n");//Might not be needed
           Serial.flush();
         }
-        else
+        else if(command.indexOf("NAME") > 0)
         {
-           Serial.print("\nError no command\n");
+          connectedName = command.substring(command.indexOf(('E'),command.length() - 1));
+          Serial.print("\n");//Might not be needed
           Serial.flush();
         }
-       
       }
-
-      //Serial.println("Started");
     }
   }
-  else
+  else if(isMeasuring)
   {
-    if(total >= limit)
+    if(total >= 6)
     {
       // Pause.
       isPaused = true;
+      isMeasuring = false;
 
-      // Get average.
-      Serial.printf("\n%3.2f\n", (rssi[0] + rssi[1] + rssi[2] + rssi[3]) / 4);
+      // Get average. Round by adding 1/2 before dividing.
+      Serial.printf("\n%3.2f\n", pow(10, (callibrationConstant - (rssi[0] + rssi[1] + rssi[2] + rssi[3] + rssi[4] + rssi[5] + 3) / 6) / 30.0));
       rssi[0] = 0;
       rssi[1] = 0;
       rssi[2] = 0;
@@ -145,7 +126,42 @@ void loop() {
       rssi[15] = 0;
       i = 0;
       total = 0;
-      //Serial.println("Paused");
+    }
+    else
+    {
+      delay(2000);
+      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+      pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
+    }
+  }
+  else // Must be callibrating.
+  {
+    if(total >= 16)
+    {
+      // Pause.
+      isPaused = true;
+
+      // Get average. Round by adding 1/2 before dividing.
+      callibrationConstant = (rssi[0] + rssi[1] + rssi[2] + rssi[3] + rssi[4] + rssi[5] + rssi[6] + rssi[7] + rssi[8] + rssi[9] + rssi[10] + rssi[11] + rssi[12] + rssi[13] + rssi[14] + rssi[15] + 8) / 16;
+      Serial.printf("\n%i\n", callibrationConstant);
+      rssi[0] = 0;
+      rssi[1] = 0;
+      rssi[2] = 0;
+      rssi[3] = 0;
+      rssi[4] = 0;
+      rssi[5] = 0;
+      rssi[6] = 0;
+      rssi[7] = 0;
+      rssi[8] = 0;
+      rssi[9] = 0;
+      rssi[10] = 0;
+      rssi[11] = 0;
+      rssi[12] = 0;
+      rssi[13] = 0;
+      rssi[14] = 0;
+      rssi[15] = 0;
+      i = 0;
+      total = 0;
     }
     else
     {

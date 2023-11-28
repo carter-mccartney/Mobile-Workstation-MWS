@@ -1,0 +1,12 @@
+<class_libraries>
+  <library path="fake_goal_checker">
+    <class type="mws_robot::FakeGoalChecker" base_class_type="nav2_core::GoalChecker">
+      <description>Does not check for a goal.</description>
+    </class>
+  </library>
+  <library path="fake_progress_checker">
+    <class type="mws_robot::FakeProgressChecker" base_class_type="nav2_core::ProgressChecker">
+      <description>Does not check for progress.</description>
+    </class>
+  </library>
+</class_libraries>

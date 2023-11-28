@@ -22,21 +22,19 @@ def generate_launch_description():
     # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
     # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
     robot_dir = get_package_share_directory('mws_robot')
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [FindPackageShare("mws_robot"), "description", "mws_robot.urdf.xacro"]
-            ),
-        ]
-    )
-    robot_description = {"robot_description": robot_description_content}
+    pkg_path = os.path.join(robot_dir)
+    xacro_file = os.path.join(pkg_path,'description','mws_robot.urdf.xacro')
+    robot_description_config = Command(['xacro ', xacro_file])
+    robot_description = {"robot_description": robot_description_config}
 
+    default_config_topics = os.path.join(robot_dir, 'params', 'twist_mux_topics.yaml')
     twist_mux = Node(
             package="twist_mux",
             executable="twist_mux",
-            remappings=[('/cmd_vel_out','/diff_cont/cmd_vel_unstamped')]
+            remappings=[('/cmd_vel_out','/diffbot_base_controller/cmd_vel_unstamped')],
+            parameters=[
+                default_config_topics
+            ]
         )
 
     controller_params_file = os.path.join(robot_dir,'params','diffbot_controllers.yaml')
@@ -44,33 +42,20 @@ def generate_launch_description():
     controller_manager = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description,
-                    controller_params_file]
+        parameters=[controller_params_file,
+                    robot_description]
     )
 
     diff_drive_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["diffbot_base_controller"],
+        arguments=["diffbot_base_controller", "joint_state_broadcaster"]
     )
 
     delayed_diff_drive_spawner = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=controller_manager,
-            on_start=[diff_drive_spawner],
-        )
-    )
-
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster"],
-    )
-
-    delayed_joint_broad_spawner = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=controller_manager,
-            on_start=[joint_broad_spawner],
+            on_start=[TimerAction(period=20.0, actions=[diff_drive_spawner])],
         )
     )
 
@@ -104,6 +89,5 @@ def generate_launch_description():
         twist_mux,
         controller_manager,
         delayed_diff_drive_spawner,
-        delayed_joint_broad_spawner,
         delayed_lidar_cmd
     ])

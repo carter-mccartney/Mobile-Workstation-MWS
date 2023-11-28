@@ -20,7 +20,7 @@ def generate_launch_description():
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('mws_robot'))
     xacro_file = os.path.join(pkg_path,'description','mws_robot.urdf.xacro')
-    robot_description_config = Command(['xacro ', xacro_file, ' sim_mode:=', use_sim_time])
+    robot_description_config = Command(['xacro ', xacro_file])
     
     # Create a robot_state_publisher node
     params = {'robot_description': robot_description_config, 'use_sim_time': use_sim_time}
