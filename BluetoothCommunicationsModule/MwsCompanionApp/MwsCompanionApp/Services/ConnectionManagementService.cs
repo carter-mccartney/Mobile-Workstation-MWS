@@ -111,6 +111,33 @@ namespace MwsCompanionApp.Services
                         {
                             this.CurrentConnection.IsConnected = true;
                             this.CurrentConnection.CanConnect = true;
+
+                            // Check if calibration has been done and suggest it if not.
+                            string appData = FileSystem.Current.AppDataDirectory;
+                            try
+                            {
+                                string filePath = Path.Combine(appData, this.CurrentConnection.Name);
+                                if(!File.Exists(filePath))
+                                {
+                                    this._services.EventService.InvokeUIMessageDispatchedEvent(this, new UIMessageEventArgs("Calibration is recommended before use.", true));
+                                }
+                                else
+                                {
+                                    // Load the calibration stored.
+                                    string fileContents = File.ReadAllText(filePath);
+                                    string[] lines = fileContents.Split('\n');
+                                    int rssi1 = int.Parse(lines[0]);
+                                    int rssi2 = int.Parse(lines[1]);
+                                    int rssi3 = int.Parse(lines[2]);
+                                    int rssi4 = int.Parse(lines[3]);
+
+                                    Task.Run(async () =>
+                                    {
+                                        await this.LoadCalibrationValues(rssi1, rssi2, rssi3, rssi4);
+                                    });
+                                }
+                            }
+                            catch(Exception) { } // Do nothing.
                         });
                     }
                 });
@@ -133,6 +160,16 @@ namespace MwsCompanionApp.Services
                     }
                 });
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task LoadCalibrationValues(int rssi1, int rssi2, int rssi3, int rssi4) 
+        {
+            // Write to the One, Two, Three, and Four characteristics.
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid, BitConverter.GetBytes(rssi1));
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationTwoUuid, BitConverter.GetBytes(rssi2));
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationThreeUuid, BitConverter.GetBytes(rssi3));
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationFourUuid, BitConverter.GetBytes(rssi4));
         }
 
 
@@ -248,6 +285,66 @@ namespace MwsCompanionApp.Services
                     this._hasModelBeenConfirmed = true;
                 }
             }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationOneUuid) 
+            {
+                // Save the value.
+                string appData = FileSystem.Current.AppDataDirectory;
+                string filePath = Path.Combine(appData, this.CurrentConnection.Name);
+                if(!File.Exists(filePath))
+                {
+                    using(StreamWriter file = new StreamWriter(File.Create(filePath)))
+                    {
+                        file.Write(value[0] + "\n\n\n\n");
+                    }
+                    
+                }
+                else
+                {
+                    string fileContents = File.ReadAllText(filePath);
+                    string[] lines = fileContents.Split('\n');
+                    lines[0] = value[0].ToString();
+                    File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+                }
+
+                // Get the next UUID.
+                this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationTwoUuid);
+            }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationTwoUuid)
+            {
+                // Save the value.
+                string appData = FileSystem.Current.AppDataDirectory;
+                string filePath = Path.Combine(appData, this.CurrentConnection.Name);
+                string fileContents = File.ReadAllText(filePath);
+                string[] lines = fileContents.Split('\n');
+                lines[1] = value[0].ToString();
+                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+
+                // Get the next UUID.
+                this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationThreeUuid);
+            }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationThreeUuid)
+            {
+                // Save the value.
+                string appData = FileSystem.Current.AppDataDirectory;
+                string filePath = Path.Combine(appData, this.CurrentConnection.Name);
+                string fileContents = File.ReadAllText(filePath);
+                string[] lines = fileContents.Split('\n');
+                lines[2] = value[0].ToString();
+                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+
+                // Get the next UUID.
+                this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationFourUuid);
+            }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationFourUuid)
+            {
+                // Save the value.
+                string appData = FileSystem.Current.AppDataDirectory;
+                string filePath = Path.Combine(appData, this.CurrentConnection.Name);
+                string fileContents = File.ReadAllText(filePath);
+                string[] lines = fileContents.Split('\n');
+                lines[3] = value[0].ToString();
+                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+            }
         }
 
         /// <summary>
@@ -287,7 +384,7 @@ namespace MwsCompanionApp.Services
                                                                                                                     category: NotificationCategory.Status,
                                                                                                                     isUrgent: true));
             }
-            else if(uuid.ToUpper() == MwsUuidStrings.FollowerChangeAdvertisementUuid) 
+            else if(uuid.ToUpper() == MwsUuidStrings.FollowerChangeAdvertisementUuid)
             {
                 // Change the advertisement.
                 this.StopAdvertisingLocation();
@@ -297,6 +394,19 @@ namespace MwsCompanionApp.Services
                 // Send an acknowledgement.
                 this.WriteValue(MwsUuidStrings.FollowerServiceUuid, MwsUuidStrings.FollowerAcknowledgeUuid, new byte[] { 0x01 });
             }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationIsCalibratingUuid) 
+            {
+                // Read the new calibration values for later. Start with one and the rest are chained.
+                App.Current.Dispatcher.Dispatch(() => this.CurrentConnection.IsCalibrating = false);
+                this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task Calibrate(byte target) 
+        {
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationTargetUuid, new byte[] { target });
+            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationIsCalibratingUuid, new byte[] { 0x01 });
         }
 
         /// <summary>
@@ -493,5 +603,40 @@ namespace MwsCompanionApp.Services
         /// The UUID to put into the client advertisement.
         /// </summary>
         public const string ClientAdvertisementUuid = "560D5EE7-2C11-478F-AB58-07211516C261";
+
+        /// <summary>
+        /// The UUID of the calibration service.
+        /// </summary>
+        public const string CalibrationServiceUuid = "3C020000-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID of the value for number One.
+        /// </summary>
+        public const string CalibrationOneUuid = "3C020001-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID of the value for number Two.
+        /// </summary>
+        public const string CalibrationTwoUuid = "3C020002-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID of the value for number Three.
+        /// </summary>
+        public const string CalibrationThreeUuid = "3C020003-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID of the value for number Four.
+        /// </summary>
+        public const string CalibrationFourUuid = "3C020004-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID for whether calibration is occurring.
+        /// </summary>
+        public const string CalibrationIsCalibratingUuid = "3C020005-295C-4EF0-8621-2E2AEA667070";
+
+        /// <summary>
+        /// The UUID for the target to calibrate.
+        /// </summary>
+        public const string CalibrationTargetUuid = "3C020006-295C-4EF0-8621-2E2AEA667070";
     }
 }

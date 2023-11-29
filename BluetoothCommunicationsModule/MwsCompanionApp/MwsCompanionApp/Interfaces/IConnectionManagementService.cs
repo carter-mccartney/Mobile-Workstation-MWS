@@ -42,6 +42,26 @@ namespace MwsCompanionApp.Interfaces
         void Disconnect();
 
         /// <summary>
+        /// Loads the calibration values for the current MWS and device pair.
+        /// </summary>
+        /// <param name="rssi1">
+        /// The RSSI value for One.
+        /// </param>
+        /// <param name="rssi2">
+        /// The RSSI value for Two.
+        /// </param>
+        /// <param name="rssi3">
+        /// The RSSI value for Three.
+        /// </param>
+        /// <param name="rssi4">
+        /// The RSSI value for Four.
+        /// </param>
+        /// <returns>
+        /// A task representing the state of the async operation.
+        /// </returns>
+        Task LoadCalibrationValues(int rssi1, int rssi2, int rssi3, int rssi4);
+
+        /// <summary>
         /// Begins the process of sharing the location with the connected MWS.
         /// </summary>
         /// <returns>
@@ -56,6 +76,17 @@ namespace MwsCompanionApp.Interfaces
         /// A task representing the async state of the operation.
         /// </returns>
         Task ExitFollowerMode();
+
+        /// <summary>
+        /// Calibrates the given target.
+        /// </summary>
+        /// <param name="target">
+        /// The number of the target to calibrate.
+        /// </param>
+        /// <returns>
+        /// A task indicating the asynchronous state of the operation.
+        /// </returns>
+        Task Calibrate(byte target);
 
         /// <summary>
         /// Renames the connected MWS.

@@ -90,4 +90,60 @@ public partial class ConnectionView : ContentView
     {
         this._viewModel.StopFollowing();
     }
+
+    /// <summary>
+    /// Calibrates the first one.
+    /// </summary>
+    /// <param name="sender">
+    /// The object invoking the event. This should be the calibrate one button.
+    /// </param>
+    /// <param name="e">
+    /// Context for the event. This is ignored by this handler.
+    /// </param>
+    private void Calibrate1_Clicked(object sender, EventArgs e) 
+    {
+        this._viewModel.Calibrate1();
+    }
+
+    /// <summary>
+    /// Calibrates the second one.
+    /// </summary>
+    /// <param name="sender">
+    /// The object invoking the event. This should be the calibrate two button.
+    /// </param>
+    /// <param name="e">
+    /// Context for the event. This is ignored by this handler.
+    /// </param>
+    private void Calibrate2_Clicked(object sender, EventArgs e)
+    {
+        this._viewModel.Calibrate2();
+    }
+
+    /// <summary>
+    /// Calibrates the third one.
+    /// </summary>
+    /// <param name="sender">
+    /// The object invoking the event. This should be the calibrate three button.
+    /// </param>
+    /// <param name="e">
+    /// Context for the event. This is ignored by this handler.
+    /// </param>
+    private void Calibrate3_Clicked(object sender, EventArgs e)
+    {
+        this._viewModel.Calibrate3();
+    }
+
+    /// <summary>
+    /// Calibrates the fourth one.
+    /// </summary>
+    /// <param name="sender">
+    /// The object invoking the event. This should be the calibrate four button.
+    /// </param>
+    /// <param name="e">
+    /// Context for the event. This is ignored by this handler.
+    /// </param>
+    private void Calibrate4_Clicked(object sender, EventArgs e)
+    {
+        this._viewModel.Calibrate4();
+    }
 }

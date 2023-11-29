@@ -68,7 +68,8 @@ namespace MwsCompanionApp.Objects
         /// <summary>
         /// Whether the MWS is currently doing anything preventing it from disconnecting.
         /// </summary>
-        public bool IsDoingAnything => this.IsFollowing;
+        public bool IsDoingAnything => this.IsFollowing ||
+                                       this.IsCalibrating;
 
         private bool _isFollowing;
         /// <summary>
@@ -80,6 +81,21 @@ namespace MwsCompanionApp.Objects
             set 
             {
                 this._isFollowing = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(this.IsDoingAnything));
+            }
+        }
+
+        private bool _isCalibrating;
+        /// <summary>
+        /// Whether the MWS is calibrating.
+        /// </summary>
+        public bool IsCalibrating 
+        {
+            get => this._isCalibrating;
+            set 
+            {
+                this._isCalibrating = value;
                 this.RaisePropertyChanged();
                 this.RaisePropertyChanged(nameof(this.IsDoingAnything));
             }
@@ -106,7 +122,7 @@ namespace MwsCompanionApp.Objects
         /// <summary>
         /// Connects to the MWS.
         /// </summary>
-        public void Connect() 
+        public void Connect()
         {
             this.CanConnect = false;
             this.Services.ConnectionService.Connect();
@@ -134,6 +150,42 @@ namespace MwsCompanionApp.Objects
         public void StopFollowing() 
         {
             this.Services.ConnectionService.ExitFollowerMode();
+        }
+
+        /// <summary>
+        /// Calibrates target One.
+        /// </summary>
+        public void Calibrate1()
+        {
+            this.IsCalibrating = true;
+            this.Services.ConnectionService.Calibrate(1);
+        }
+
+        /// <summary>
+        /// Calibrates target Two.
+        /// </summary>
+        public void Calibrate2()
+        {
+            this.IsCalibrating = true;
+            this.Services.ConnectionService.Calibrate(2);
+        }
+
+        /// <summary>
+        /// Calibrates target Three.
+        /// </summary>
+        public void Calibrate3()
+        {
+            this.IsCalibrating = true;
+            this.Services.ConnectionService.Calibrate(3);
+        }
+
+        /// <summary>
+        /// Calibrates target Four.
+        /// </summary>
+        public void Calibrate4()
+        {
+            this.IsCalibrating = true;
+            this.Services.ConnectionService.Calibrate(4);
         }
 
         /// <summary>

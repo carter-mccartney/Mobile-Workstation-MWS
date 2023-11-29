@@ -164,28 +164,43 @@ namespace MwsCompanionApp.Services
                                                                             // Check that the required services and characteristics are present and set up notifications.
                                                                             if(gatt.GetService(MwsUuidObjects.FollowerServiceUuid) is BluetoothGattService followerService &&
                                                                                gatt.GetService(MwsUuidObjects.MessengerServiceUuid) is BluetoothGattService messengerService &&
+                                                                               gatt.GetService(MwsUuidObjects.CalibrationServiceUuid) is BluetoothGattService calibrationService &&
                                                                                followerService.GetCharacteristic(MwsUuidObjects.FollowerAcknowledgeUuid) is BluetoothGattCharacteristic followerAcknowledge &&
                                                                                followerService.GetCharacteristic(MwsUuidObjects.FollowerChangeAdvertisementUuid) is BluetoothGattCharacteristic followerChangeAdvertisement &&
                                                                                followerService.GetCharacteristic(MwsUuidObjects.FollowerIsActivatedUuid) is BluetoothGattCharacteristic followerIsActivated &&
                                                                                followerService.GetCharacteristic(MwsUuidObjects.FollowerRangeUuid) is BluetoothGattCharacteristic followerRange &&
                                                                                followerService.GetCharacteristic(MwsUuidObjects.FollowerSignatureUuid) is BluetoothGattCharacteristic followerSignature &&
                                                                                messengerService.GetCharacteristic(MwsUuidObjects.MessengerMessageUuid) is BluetoothGattCharacteristic messengerMessage &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationOneUuid) is BluetoothGattCharacteristic calibrationOne &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationTwoUuid) is BluetoothGattCharacteristic calibrationTwo &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationThreeUuid) is BluetoothGattCharacteristic calibrationThree &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationFourUuid) is BluetoothGattCharacteristic calibrationFour &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationIsCalibratingUuid) is BluetoothGattCharacteristic calibrationIsCalibrating &&
+                                                                               calibrationService.GetCharacteristic(MwsUuidObjects.CalibrationTargetUuid) is BluetoothGattCharacteristic calibrationTarget &&
                                                                                (followerAcknowledge.Properties & (GattProperty.Write | GattProperty.Notify)) != 0 &&
                                                                                (followerChangeAdvertisement.Properties & GattProperty.Notify) != 0 &&
                                                                                (followerIsActivated.Properties & (GattProperty.Read | GattProperty.Write | GattProperty.Notify)) != 0 &&
                                                                                (followerRange.Properties & GattProperty.Read) != 0 &&
                                                                                (followerSignature.Properties & GattProperty.Write) != 0 &&
-                                                                               (messengerMessage.Properties & (GattProperty.Read | GattProperty.Notify)) != 0)
+                                                                               (messengerMessage.Properties & (GattProperty.Read | GattProperty.Notify)) != 0 &&
+                                                                               (calibrationOne.Properties & (GattProperty.Write | GattProperty.Read)) != 0 &&
+                                                                               (calibrationTwo.Properties & (GattProperty.Write | GattProperty.Read)) != 0 &&
+                                                                               (calibrationThree.Properties & (GattProperty.Write | GattProperty.Read)) != 0 &&
+                                                                               (calibrationFour.Properties & (GattProperty.Write | GattProperty.Read)) != 0 &&
+                                                                               (calibrationIsCalibrating.Properties & (GattProperty.Write | GattProperty.Notify)) != 0 &&
+                                                                               (calibrationTarget.Properties & GattProperty.Write) != 0)
                                                                             {
                                                                                 // Set up notifications for these properties.
                                                                                 UUID cccdUuid = UUID.FromString(ConnectionManagementService._cccdUuid);
                                                                                 characteristicsWithNotifications.Add(followerChangeAdvertisement.GetDescriptor(cccdUuid));
                                                                                 characteristicsWithNotifications.Add(followerIsActivated.GetDescriptor(cccdUuid));
                                                                                 characteristicsWithNotifications.Add(messengerMessage.GetDescriptor(cccdUuid));
+                                                                                characteristicsWithNotifications.Add(calibrationIsCalibrating.GetDescriptor(cccdUuid));
                                                                                 gatt.SetCharacteristicNotification(followerAcknowledge, true);
                                                                                 gatt.SetCharacteristicNotification(followerChangeAdvertisement, true);
                                                                                 gatt.SetCharacteristicNotification(followerIsActivated, true);
                                                                                 gatt.SetCharacteristicNotification(messengerMessage, true);
+                                                                                gatt.SetCharacteristicNotification(calibrationIsCalibrating, true);
 
                                                                                 await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -510,5 +525,40 @@ namespace MwsCompanionApp.Services
         /// The UUID advertised by the client.
         /// </summary>
         public static readonly ParcelUuid ClientAdvertisementUuid = ParcelUuid.FromString(MwsUuidStrings.ClientAdvertisementUuid);
+
+        /// <summary>
+        /// The UUID of the calibration service.
+        /// </summary>
+        public static readonly UUID CalibrationServiceUuid = UUID.FromString(MwsUuidStrings.CalibrationServiceUuid);
+
+        /// <summary>
+        /// The UUID of the value for number One.
+        /// </summary>
+        public static readonly UUID CalibrationOneUuid = UUID.FromString(MwsUuidStrings.CalibrationOneUuid);
+
+        /// <summary>
+        /// The UUID of the value for number Two.
+        /// </summary>
+        public static readonly UUID CalibrationTwoUuid = UUID.FromString(MwsUuidStrings.CalibrationTwoUuid);
+
+        /// <summary>
+        /// The UUID of the value for number Three.
+        /// </summary>
+        public static readonly UUID CalibrationThreeUuid = UUID.FromString(MwsUuidStrings.CalibrationThreeUuid);
+
+        /// <summary>
+        /// The UUID of the value for number Four.
+        /// </summary>
+        public static readonly UUID CalibrationFourUuid = UUID.FromString(MwsUuidStrings.CalibrationFourUuid);
+
+        /// <summary>
+        /// The UUID for whether calibration is occurring.
+        /// </summary>
+        public static readonly UUID CalibrationIsCalibratingUuid = UUID.FromString(MwsUuidStrings.CalibrationIsCalibratingUuid);
+
+        /// <summary>
+        /// The UUID for the target to calibrate.
+        /// </summary>
+        public static readonly UUID CalibrationTargetUuid = UUID.FromString(MwsUuidStrings.CalibrationTargetUuid);
     }
 }
