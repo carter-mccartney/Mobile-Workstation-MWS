@@ -303,7 +303,7 @@ namespace MwsCompanionApp.Services
                     string fileContents = File.ReadAllText(filePath);
                     string[] lines = fileContents.Split('\n');
                     lines[0] = value[0].ToString();
-                    File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+                    File.WriteAllText(filePath, lines.Take(4).Aggregate("", (c, n) => c + n + "\n"));
                 }
 
                 // Get the next UUID.
@@ -317,7 +317,7 @@ namespace MwsCompanionApp.Services
                 string fileContents = File.ReadAllText(filePath);
                 string[] lines = fileContents.Split('\n');
                 lines[1] = value[0].ToString();
-                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+                File.WriteAllText(filePath, lines.Take(4).Aggregate("", (c, n) => c + n + "\n"));
 
                 // Get the next UUID.
                 this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationThreeUuid);
@@ -330,7 +330,7 @@ namespace MwsCompanionApp.Services
                 string fileContents = File.ReadAllText(filePath);
                 string[] lines = fileContents.Split('\n');
                 lines[2] = value[0].ToString();
-                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+                File.WriteAllText(filePath, lines.Take(4).Aggregate("", (c, n) => c + n + "\n"));
 
                 // Get the next UUID.
                 this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationFourUuid);
@@ -343,7 +343,7 @@ namespace MwsCompanionApp.Services
                 string fileContents = File.ReadAllText(filePath);
                 string[] lines = fileContents.Split('\n');
                 lines[3] = value[0].ToString();
-                File.WriteAllText(filePath, lines.Aggregate("", (c, n) => c + n + "\n"));
+                File.WriteAllText(filePath, lines.Take(4).Aggregate("", (c, n) => c + n + "\n"));
             }
         }
 
@@ -397,8 +397,11 @@ namespace MwsCompanionApp.Services
             else if(uuid.ToUpper() == MwsUuidStrings.CalibrationIsCalibratingUuid) 
             {
                 // Read the new calibration values for later. Start with one and the rest are chained.
-                App.Current.Dispatcher.Dispatch(() => this.CurrentConnection.IsCalibrating = false);
-                this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid);
+                App.Current.Dispatcher.Dispatch(() => 
+                {
+                    this.CurrentConnection.IsCalibrating = false;
+                    this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid);
+                });
             }
         }
 

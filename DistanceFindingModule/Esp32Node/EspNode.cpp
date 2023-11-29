@@ -5,6 +5,9 @@
 #include <example_interfaces/msg/bool.hpp>
 #include <example_interfaces/msg/string.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <example_interfaces/msg/bool.hpp>
+#include <example_interfaces/msg/int8.hpp>
+#include <example_interfaces/msg/u_int8.hpp>
 
 // Used for gettign timestamps.
 #include <rclcpp/time.hpp>
@@ -37,6 +40,17 @@ public:
         this->signatureSubscriber = this->create_subscription<example_interfaces::msg::String>("followee_signature", 1, std::bind(&Esp32Driver::singatureChanged, this, _1));
         this->isRunningSubscriber = this->create_subscription<example_interfaces::msg::Bool>("follower_mode_is_running", 10, std::bind(&Esp32Driver::isRunningChanged, this, _1));
         this->messagePublisher = this->create_publisher<example_interfaces::msg::String>("user_message", 10);
+		this->oneSubscriber = this->create_subscription<example_interfaces::msg::Int8>("calibration_value_one", 10, std::bind(&Esp32Driver::onOneUpdated, this, _1));
+		this->twoSubscriber = this->create_subscription<example_interfaces::msg::Int8>("calibration_value_two", 10, std::bind(&Esp32Driver::onTwoUpdated, this, _1));
+		this->threeSubscriber = this->create_subscription<example_interfaces::msg::Int8>("calibration_value_three", 10, std::bind(&Esp32Driver::onThreeUpdated, this, _1));
+		this->fourSubscriber = this->create_subscription<example_interfaces::msg::Int8>("calibration_value_four", 10, std::bind(&Esp32Driver::onFourUpdated, this, _1));
+		this->newOnePublisher = this->create_publisher<example_interfaces::msg::Int8>("new_calibration_value_one", 10);
+		this->newTwoPublisher = this->create_publisher<example_interfaces::msg::Int8>("new_calibration_value_two", 10);
+		this->newThreePublisher = this->create_publisher<example_interfaces::msg::Int8>("new_calibration_value_three", 10);
+		this->newFourPublisher = this->create_publisher<example_interfaces::msg::Int8>("new_calibration_value_four", 10);
+		this->isCalibratingSubscriber = this->create_subscription<example_interfaces::msg::Bool>("is_calibrating", 10, std::bind(&Esp32Driver::onCalibrationStarted, this, _1));
+		this->isCalibratingPublisher = this->create_publisher<example_interfaces::msg::Bool>("is_calibrating_return", 10);
+		this->targetSubscriber = this->create_subscription<example_interfaces::msg::UInt8>("calibration_target", 10, std::bind(&Esp32Driver::targetChanged, this, _1));
 
         // Create transform buffer and listener.
         this->tfBuffer = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -92,6 +106,39 @@ private:
     // The publisher of the error message for the user.
     rclcpp::Publisher<example_interfaces::msg::String>::SharedPtr messagePublisher;
 
+	// The subscriber for the calibration of one.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr oneSubscriber;
+
+	// The publisher for the calibration of one.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr newOnePublisher;
+
+	// The subscriber for the calibration of two.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr twoSubscriber;
+
+	// The publisher for the calibration of two.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr newTwoPublisher;
+
+	// The subscriber for the calibration of three.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr threeSubscriber;
+
+	// The publisher for the calibration of three.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr newThreePublisher;
+
+	// The subscriber for the calibration of four.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr fourSubscriber;
+
+	// The publisher for the calibration of four.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr newFourPublisher;
+
+	// The subscriber for whether calibration is on-going.
+	rclcpp::Subscription<example_interfaces::msg::Bool>::SharedPtr isCalibratingSubscriber;
+
+	// The publisher for the whether calibration is on-going.
+	rclcpp::Publisher<example_interfaces::msg::Bool>::SharedPtr isCalibratingPublisher;
+
+	// The subscriber for the calibration target.
+	rclcpp::Subscription<example_interfaces::msg::UInt8>::SharedPtr targetSubscriber;
+
     // The buffer for holding the transformations.
     std::shared_ptr<tf2_ros::Buffer> tfBuffer;
 
@@ -100,6 +147,9 @@ private:
 
     // The current goal to publish.
     geometry_msgs::msg::PoseStamped goal;
+
+    // The current target of calibration.
+    uint8_t calibrationTarget;
 
     // Updates the signature of the user.
     void singatureChanged(const example_interfaces::msg::String& msg)
@@ -110,6 +160,75 @@ private:
 
     // Updates the running state and launches a thread to update position.
     void isRunningChanged(const example_interfaces::msg::Bool& msg);
+
+    // Updates the set calibration value of one.
+    void onOneUpdated(const example_interfaces::msg::Int8& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("One Updated to " + std::to_string(message.data)).c_str());
+        Esp32Commands::loadCalibration(esps[0], message.data);
+    }
+
+    // Updates the set calibration value of two.
+    void onTwoUpdated(const example_interfaces::msg::Int8& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("Two Updated to " + std::to_string(message.data)).c_str());
+        Esp32Commands::loadCalibration(esps[1], message.data);
+    }
+
+    // Updates the set calibration value of three.
+    void onThreeUpdated(const example_interfaces::msg::Int8& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("Three Updated to " + std::to_string(message.data)).c_str());
+        Esp32Commands::loadCalibration(esps[2], message.data);
+    }
+
+    // Updates the set calibration value of four.
+    void onFourUpdated(const example_interfaces::msg::Int8& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("Four Updated to " + std::to_string(message.data)).c_str());
+        Esp32Commands::loadCalibration(esps[3], message.data);
+    }
+
+    // Updates the current target.
+    void targetChanged(const example_interfaces::msg::UInt8& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("Target is " + std::to_string(message.data)).c_str());
+        this->calibrationTarget = message.data;
+    }
+
+    // Performs the calibration of the target.
+    void onCalibrationStarted(const example_interfaces::msg::Bool& message)
+    {
+        RCLCPP_INFO(this->get_logger(), ("Calibration Started. Calibrating " + std::to_string(this->calibrationTarget)).c_str());
+        int result = Esp32Commands::calibrate(esps[this->calibrationTarget - 1]);
+        if(this->calibrationTarget == 1)
+        {
+            example_interfaces::msg::Int8 valueMessage;
+            valueMessage.data = result;
+            this->newOnePublisher->publish(valueMessage);
+        }
+        else if(this->calibrationTarget == 2)
+        {
+            example_interfaces::msg::Int8 valueMessage;
+            valueMessage.data = result;
+            this->newTwoPublisher->publish(valueMessage);
+        }
+        else if(this->calibrationTarget == 3)
+        {
+            example_interfaces::msg::Int8 valueMessage;
+            valueMessage.data = result;
+            this->newThreePublisher->publish(valueMessage);
+        }
+        else
+        {
+            example_interfaces::msg::Int8 valueMessage;
+            valueMessage.data = result;
+            this->newFourPublisher->publish(valueMessage);
+        }
+        example_interfaces::msg::Bool output;
+        output.data = false;
+        this->isCalibratingPublisher->publish(output);
+    }
 };
 
 // The global reference to the node.
