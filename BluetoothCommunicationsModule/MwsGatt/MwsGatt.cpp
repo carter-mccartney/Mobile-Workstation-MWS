@@ -106,6 +106,7 @@
 #include <example_interfaces/msg/float64.hpp>
 #include <example_interfaces/msg/string.hpp>
 #include <example_interfaces/msg/u_int8.hpp>
+#include <example_interfaces/msg/int8.hpp>
 
 //
 // Constants
@@ -129,6 +130,17 @@ public:
       	this->rangePublisher = this->create_publisher<example_interfaces::msg::Float64>("follower_range", 10);
 		this->signaturePublisher = this->create_publisher<example_interfaces::msg::String>("followee_signature", 10);
 		this->isActivatedPublisher = this->create_publisher<example_interfaces::msg::Bool>("follower_mode_is_running", 10);
+		this->onePublisher = this->create_publisher<example_interfaces::msg::Int8>("calibration_value_one", 10);
+		this->twoPublisher = this->create_publisher<example_interfaces::msg::Int8>("calibration_value_two", 10);
+		this->threePublisher = this->create_publisher<example_interfaces::msg::Int8>("calibration_value_three", 10);
+		this->fourPublisher = this->create_publisher<example_interfaces::msg::Int8>("calibration_value_four", 10);
+		this->newOneSubscriber = this->create_subscription<example_interfaces::msg::Int8>("new_calibration_value_one", 10, std::bind(&GattNode::onOneChanged, this, _1));
+		this->newTwoSubscriber = this->create_subscription<example_interfaces::msg::Int8>("new_calibration_value_two", 10, std::bind(&GattNode::onTwoChanged, this, _1));
+		this->newThreeSubscriber = this->create_subscription<example_interfaces::msg::Int8>("new_calibration_value_three", 10, std::bind(&GattNode::onThreeChanged, this, _1));
+		this->newFourSubscriber = this->create_subscription<example_interfaces::msg::Int8>("new_calibration_value_four", 10, std::bind(&GattNode::onFourChanged, this, _1));
+		this->isCalibratingPublisher = this->create_publisher<example_interfaces::msg::Bool>("is_calibrating", 10);
+		this->isCalibratingSubscriber = this->create_subscription<example_interfaces::msg::Bool>("is_calibrating_return", 10, std::bind(&GattNode::onIsCalibratingUpdated, this, _1));
+		this->targetPublisher = this->create_publisher<example_interfaces::msg::UInt8>("calibration_target", 10);
     }
 	~GattNode()
 	{
@@ -217,6 +229,112 @@ public:
 		ggkNofifyUpdatedCharacteristic("/com/gobbledegook/messenger/message");
 	}
 
+	// Gets the currently stored calibration for one.
+	int8_t getOne()
+	{
+		return this->oneCalibrationValue;
+	}
+
+	// Sets the currently stored calibration for one.
+	void setOne(int8_t one)
+	{
+		this->oneCalibrationValue = one;
+		example_interfaces::msg::Int8 message;
+		message.data = one;
+		this->onePublisher->publish(message);
+	}
+
+	// Updates the value of one.
+	void onOneChanged(const example_interfaces::msg::Int8& message)
+	{
+		this->oneCalibrationValue = message.data;
+	}
+
+	// Gets the currently stored calibration for two.
+	int8_t getTwo()
+	{
+		return this->twoCalibrationValue;
+	}
+
+	// Sets the currently stored calibration for two.
+	void setTwo(int8_t two)
+	{
+		this->twoCalibrationValue = two;
+		example_interfaces::msg::Int8 message;
+		message.data = two;
+		this->twoPublisher->publish(message);
+	}
+
+	// Updates the value of two.
+	void onTwoChanged(const example_interfaces::msg::Int8& message)
+	{
+		this->twoCalibrationValue = message.data;
+	}
+
+	// Gets the currently stored calibration for three.
+	int8_t getThree()
+	{
+		return this->threeCalibrationValue;
+	}
+
+	// Sets the currently stored calibration for three.
+	void setThree(int8_t three)
+	{
+		this->threeCalibrationValue = three;
+		example_interfaces::msg::Int8 message;
+		message.data = three;
+		this->threePublisher->publish(message);
+	}
+
+	// Updates the value of three.
+	void onThreeChanged(const example_interfaces::msg::Int8& message)
+	{
+		this->threeCalibrationValue = message.data;
+	}
+
+	// Gets the currently stored calibration for four.
+	int8_t getFour()
+	{
+		return this->fourCalibrationValue;
+	}
+
+	// Sets the currently stored calibration for four.
+	void setFour(int8_t four)
+	{
+		this->fourCalibrationValue = four;
+		example_interfaces::msg::Int8 message;
+		message.data = four;
+		this->fourPublisher->publish(message);
+	}
+
+	// Updates the value of four.
+	void onFourChanged(const example_interfaces::msg::Int8& message)
+	{
+		this->fourCalibrationValue = message.data;
+	}
+
+	// Sets whether calibration has started.
+	void setIsCalibrating(bool value)
+	{
+		example_interfaces::msg::Bool message = example_interfaces::msg::Bool();
+		message.data = value;
+		this->isCalibratingPublisher.get()->publish(message);
+	}
+
+	// Notifies that calibration has comlpeted.
+	void onIsCalibratingUpdated(example_interfaces::msg::Bool message)
+	{
+		ggkNofifyUpdatedCharacteristic("/com/gobbledegook/calibration/is_calibrating");
+	}
+
+	// Sets the current target.
+	void setTarget(uint8_t target)
+	{
+		example_interfaces::msg::UInt8 message;
+		message.data = target;
+		this->targetPublisher->publish(message);
+	}
+
 private:
 	// Whether follower mode is activated.
 	bool isActivated = false;
@@ -229,6 +347,18 @@ private:
 
 	// The most recent message delivered.
 	std::string* currentMessage;
+
+	// The calibration value of one.
+	uint8_t oneCalibrationValue = -69;
+
+	// The calibration value of two.
+	uint8_t twoCalibrationValue = -69;
+
+	// The calibration value of three.
+	uint8_t threeCalibrationValue = -69;
+
+	// The calibration value of four.
+	uint8_t fourCalibrationValue = -69;
 
 	// The publisher for the current range.
 	rclcpp::Publisher<example_interfaces::msg::Float64>::SharedPtr rangePublisher;
@@ -250,6 +380,39 @@ private:
 
 	// The subscriber for the range.
 	rclcpp::Subscription<example_interfaces::msg::Float64>::SharedPtr rangeSubscriber;
+
+	// The publisher for the calibration of one.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr onePublisher;
+
+	// The subscriber for the calibration of one.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr newOneSubscriber;
+
+	// The publisher for the calibration of two.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr twoPublisher;
+
+	// The subscriber for the calibration of two.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr newTwoSubscriber;
+
+	// The publisher for the calibration of three.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr threePublisher;
+
+	// The subscriber for the calibration of three.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr newThreeSubscriber;
+
+	// The publisher for the calibration of four.
+	rclcpp::Publisher<example_interfaces::msg::Int8>::SharedPtr fourPublisher;
+
+	// The subscriber for the calibration of four.
+	rclcpp::Subscription<example_interfaces::msg::Int8>::SharedPtr newFourSubscriber;
+
+	// The publisher for whether calibration is on-going.
+	rclcpp::Publisher<example_interfaces::msg::Bool>::SharedPtr isCalibratingPublisher;
+
+	// The subscriber for the whether calibration is on-going.
+	rclcpp::Subscription<example_interfaces::msg::Bool>::SharedPtr isCalibratingSubscriber;
+
+	// The publisher for the calibration target.
+	rclcpp::Publisher<example_interfaces::msg::UInt8>::SharedPtr targetPublisher;
 };
 
 // The ROS node for communications.
@@ -316,6 +479,10 @@ void signalHandler(int signum)
 double rangeResult;
 bool isActivatedResult;
 uint8_t batteryLevelResult;
+int8_t oneResult;
+int8_t twoResult;
+int8_t threeResult;
+int8_t fourResult;
 
 // Called by the server when it wants to retrieve a named value
 //
@@ -353,6 +520,26 @@ const void *dataGetter(const char *pName)
 		else if(serviceCharacteristic == "messenger/message")
 		{
 			return node.get()->getMessage()->c_str();
+		}
+		else if(serviceCharacteristic == "calibration/one")
+		{
+			oneResult = node.get()->getOne();
+			return &oneResult;
+		}
+		else if(serviceCharacteristic == "calibration/two")
+		{
+			twoResult = node.get()->getTwo();
+			return &twoResult;
+		}
+		else if(serviceCharacteristic == "calibration/three")
+		{
+			threeResult = node.get()->getThree();
+			return &threeResult;
+		}
+		else if(serviceCharacteristic == "calibration/four")
+		{
+			fourResult = node.get()->getFour();
+			return &fourResult;
 		}
 
 		return nullptr;
@@ -400,6 +587,42 @@ int dataSetter(const char *pName, const void *pData)
 			isAwaitingAcknowledge = false;
 
 			// TODO: Update ESP-32s with new challenge.
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/one")
+		{
+			int8_t one = *(int8_t*)pData;
+			node->setOne(one);
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/two")
+		{
+			int8_t two = *(int8_t*)pData;
+			node->setTwo(two);
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/three")
+		{
+			int8_t three = *(int8_t*)pData;
+			node->setThree(three);
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/four")
+		{
+			int8_t four = *(int8_t*)pData;
+			node->setFour(four);
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/is_calibrating")
+		{
+			bool isCalibrating = *(bool*)pData;
+			node->setIsCalibrating(isCalibrating);
+			return 1;
+		}
+		else if(serviceCharacteristic == "calibration/target")
+		{
+			uint8_t target = *(uint8_t*)pData;
+			node->setTarget(target);
 			return 1;
 		}
 
