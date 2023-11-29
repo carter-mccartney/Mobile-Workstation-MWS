@@ -76,18 +76,9 @@ def generate_launch_description():
     #
     # Replace the diff_drive_spawner in the final return with delayed_diff_drive_spawner
 
-
-
-    lidar_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('rplidar_ros'), 'launch', 'rplidar_a1_launch.py')))
-
-    delayed_lidar_cmd = TimerAction(period=10.0,actions=[lidar_cmd])
-
     # Launch them all!
     return LaunchDescription([
         twist_mux,
         controller_manager,
-        delayed_diff_drive_spawner,
-        delayed_lidar_cmd
+        delayed_diff_drive_spawner
     ])

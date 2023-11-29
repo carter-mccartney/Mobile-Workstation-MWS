@@ -111,6 +111,7 @@ private:
                 }
             }
             catch(const LibSerial::AlreadyOpen& ex){}
+            catch(const LibSerial::OpenFailed& ex){}
 
             if(isPortOpen)
             {
@@ -149,7 +150,7 @@ public:
             // TODO: Light indicator that tells the user of the MWS that the Raspberry Pi is not connected to the Arduino.
 
             /* Failed to find the arduino serial port. */
-            return false;
+            return true;
         }
 
         /* Successfully connected to the arduino serial port. */

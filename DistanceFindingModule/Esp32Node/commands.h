@@ -10,9 +10,6 @@
 #include "Mapping.h"
 using namespace std;
 using namespace LibSerial;
-
-#define DEBUG
-
 namespace fs = std::experimental::filesystem;
 
 // The set of ESP32s.
@@ -112,6 +109,8 @@ namespace Esp32Commands
                 }
             }
             catch(const LibSerial::AlreadyOpen& ex) {}
+            catch(const LibSerial::OpenFailed& ex) {}
+
 
             if(isPortOpen)
             {
