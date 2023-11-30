@@ -421,12 +421,36 @@ Server::Server(const std::string &serviceName, const std::string &advertisingNam
 		 * This represents the range from the user for the device. This is read-only for now.
 		 *  
 		 */
-		.gattCharacteristicBegin("range", "CCA80004-A7BE-4E5A-8506-9125CE3D98E8", { "read" })
+		.gattCharacteristicBegin("range", "CCA80004-A7BE-4E5A-8506-9125CE3D98E8", { "read", "write" })
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
 				double range = self.getDataValue<double>("follower/range", 5.0);
 				Logger::debug(SSTR << "Range read: " << range);
 				self.methodReturnValue(pInvocation, (uint8_t)(range * 2), true);
+			})
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("follower/range", bytes);
+				std::string debugMessage = "Range Changed: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
 			})
 		.gattCharacteristicEnd()
 		/*
@@ -455,16 +479,221 @@ Server::Server(const std::string &serviceName, const std::string &advertisingNam
 	.gattServiceEnd()
 
 	/*
-	 * Calibration Service (0x)
+	 * Calibration Service (0x3C020000295C4EF086212E2AEA667070)
 	 * 
+	 * This contains the characteristics required to calibrate the MWS sensors on connection
+	 * and by initiation of the user.
 	 * 
 	 */
-	/*
-	.gattServiceBegin("calibration", "")
-		.gattCharacteristicBegin("", "", {})
+	.gattServiceBegin("calibration", "3C020000-295C-4EF0-8621-2E2AEA667070")
+		/*
+		 * One Characteristic (0x0001)
+		 * 
+		 * This represents the value for calibration of sensor one.
+		 * 
+		 */
+		.gattCharacteristicBegin("one", "3C020001-295C-4EF0-8621-2E2AEA667070", { "read", "write" })
+			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+				uint32_t calibrationValue = self.getDataValue<uint32_t>("calibration/one", -69);
+				Logger::debug(SSTR << "Calibration One read: " << calibrationValue);
+				self.methodReturnValue(pInvocation, calibrationValue, true);
+			})
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("calibration/one", bytes);
+				std::string debugMessage = "Calibration One Written: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
+		.gattCharacteristicEnd()
+		/*
+		 * Two Characteristic (0x0002)
+		 * 
+		 * This represents the value for calibration of sensor two.
+		 * 
+		 */
+		.gattCharacteristicBegin("two", "3C020002-295C-4EF0-8621-2E2AEA667070", { "read", "write" })
+			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+				uint32_t calibrationValue = self.getDataValue<uint32_t>("calibration/two", -69);
+				Logger::debug(SSTR << "Calibration Two read: " << calibrationValue);
+				self.methodReturnValue(pInvocation, calibrationValue, true);
+			})
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("calibration/two", bytes);
+				std::string debugMessage = "Calibration Two Written: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
+		.gattCharacteristicEnd()
+		/*
+		 * Three Characteristic (0x0003)
+		 * 
+		 * This represents the value for calibration of sensor three.
+		 * 
+		 */
+		.gattCharacteristicBegin("three", "3C020003-295C-4EF0-8621-2E2AEA667070", { "read", "write" })
+			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+				uint32_t calibrationValue = self.getDataValue<uint32_t>("calibration/three", -69);
+				Logger::debug(SSTR << "Calibration Three read: " << calibrationValue);
+				self.methodReturnValue(pInvocation, calibrationValue, true);
+			})
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("calibration/three", bytes);
+				std::string debugMessage = "Calibration Three Written: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
+		.gattCharacteristicEnd()
+		/*
+		 * Four Characteristic (0x0004)
+		 * 
+		 * This represents the value for calibration of sensor four.
+		 * 
+		 */
+		.gattCharacteristicBegin("four", "3C020004-295C-4EF0-8621-2E2AEA667070", { "read", "write" })
+			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+				uint32_t calibrationValue = self.getDataValue<uint32_t>("calibration/four", -69);
+				Logger::debug(SSTR << "Calibration Four read: " << calibrationValue);
+				self.methodReturnValue(pInvocation, calibrationValue, true);
+			})
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("calibration/four", bytes);
+				std::string debugMessage = "Calibration Four Written: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
+		.gattCharacteristicEnd()
+		/*
+		 * Is Calibrating Characteristic (0x0005)
+		 *
+		 * This represents whether calibration is ongoing.
+		 *
+		 */
+		.gattCharacteristicBegin("is_calibrating", "3C020005-295C-4EF0-8621-2E2AEA667070", { "write", "notify" })
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Update the value through the setter.
+				self.setDataValue<uint8_t>("calibration/is_calibrating", 1);
+				Logger::debug(SSTR << "Beginning Calibration");
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
+			.onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+			{
+				Logger::debug(SSTR << "Ending Calibration");
+				self.sendChangeNotificationValue<int>(pConnection, 1);
+				return true;
+			})
+		.gattCharacteristicEnd()
+		/*
+		 * Target Characteristic (0x0006)
+		 *
+		 * This represents the target of calibration.
+		 * 
+		 */
+		.gattCharacteristicBegin("target", "3C020006-295C-4EF0-8621-2E2AEA667070", { "write" })
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+				// Convert to bytes of data.
+				GVariant* transmission = g_variant_get_child_value(pParameters, 0);
+				gsize size;
+				const uint8_t* variantBytes = static_cast<const uint8_t*>(g_variant_get_fixed_array(transmission, &size, sizeof(uint8_t)));
+				uint8_t* bytes = new uint8_t[size];
+				for(int i = 0; i < (int)size; i++)
+				{
+					bytes[i] = variantBytes[i];
+				}
+
+				// Update the value through the setter.
+				self.setDataPointer<uint8_t*>("calibration/target", bytes);
+				std::string debugMessage = "Target acquired: ";
+				for(int i = 0; i < (int)size; i++)
+				{
+					debugMessage += bytes[i];
+				}
+				Logger::debug(SSTR << debugMessage);
+
+				// Return properly by protocol.
+                self.methodReturnVariant(pInvocation, NULL);
+			})
 		.gattCharacteristicEnd()
 	.gattServiceEnd()
-	*/
 
 	/*
 	 * Messenger Service (0xA58F00006AD94E688333BFEF89ADCF9B)

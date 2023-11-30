@@ -127,7 +127,7 @@ public:
 		this->batteryLevelSubscriber = this->create_subscription<example_interfaces::msg::UInt8>("battery_level", 10, std::bind(&GattNode::onBatteryLevelUpdated, this, _1));
 		this->isRunningSubscriber = this->create_subscription<example_interfaces::msg::Bool>("follower_mode_is_running_request", 10, std::bind(&GattNode::onIsActivatedChanged, this, _1));
 		this->rangeSubscriber = this->create_subscription<example_interfaces::msg::Float64>("follower_range_request", 10, std::bind(&GattNode::onRangeChanged, this, _1));
-      	this->rangePublisher = this->create_publisher<example_interfaces::msg::Float64>("follower_range", 10);
+      	this->rangePublisher = this->create_publisher<example_interfaces::msg::Float64>("range_update", 10);
 		this->signaturePublisher = this->create_publisher<example_interfaces::msg::String>("followee_signature", 10);
 		this->isActivatedPublisher = this->create_publisher<example_interfaces::msg::Bool>("follower_mode_is_running", 10);
 		this->onePublisher = this->create_publisher<example_interfaces::msg::Int8>("calibration_value_one", 10);
@@ -322,7 +322,7 @@ public:
 	}
 
 	// Notifies that calibration has comlpeted.
-	void onIsCalibratingUpdated(example_interfaces::msg::Bool message)
+	void onIsCalibratingUpdated(const example_interfaces::msg::Bool& message)
 	{
 		ggkNofifyUpdatedCharacteristic("/com/gobbledegook/calibration/is_calibrating");
 	}
@@ -581,6 +581,12 @@ int dataSetter(const char *pName, const void *pData)
 			node.get()->setSignature(signature);
 			return 1;
 		}
+        else if(serviceCharacteristic == "follower/range")
+        {
+            uint8_t range = *(uint8_t*)pData;
+            node.get()->setRange(range / 2.0);
+            return 1;
+        }
 		else if(serviceCharacteristic == "follower/acknowledge")
 		{
 			cyclesSinceAcknowledge = 0;
@@ -767,7 +773,7 @@ int main(int argc, char **argv)
 void reset()
 {
 	node.get()->setIsActivated(false);
-	node.get()->setRange(5.0);
+	node.get()->setRange(1.0);
 	cyclesSinceAcknowledge = 0;
 	isAwaitingAcknowledge = false;
 }
