@@ -107,10 +107,13 @@ namespace MwsCompanionApp.Services
                 {
                     lock(lockObject)
                     {
-                        App.Current.Dispatcher.Dispatch(() =>
+                        App.Current.Dispatcher.Dispatch(async () =>
                         {
                             this.CurrentConnection.IsConnected = true;
                             this.CurrentConnection.CanConnect = true;
+
+                            // Set the preferred range.
+                            await this.WriteValue(MwsUuidStrings.FollowerServiceUuid, MwsUuidStrings.FollowerRangeUuid, new byte[] { this.CurrentConnection.Range });
 
                             // Check if calibration has been done and suggest it if not.
                             string appData = FileSystem.Current.AppDataDirectory;
@@ -131,7 +134,7 @@ namespace MwsCompanionApp.Services
                                     int rssi3 = int.Parse(lines[2]);
                                     int rssi4 = int.Parse(lines[3]);
 
-                                    Task.Run(async () =>
+                                    await Task.Run(async () =>
                                     {
                                         await this.LoadCalibrationValues(rssi1, rssi2, rssi3, rssi4);
                                     });
@@ -285,7 +288,12 @@ namespace MwsCompanionApp.Services
                     this._hasModelBeenConfirmed = true;
                 }
             }
-            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationOneUuid) 
+            else if(uuid.ToUpper() == MwsUuidStrings.FollowerRangeUuid) 
+            {
+                // Read the range into the MWS.
+                this.CurrentConnection.Range = value[0];
+            }
+            else if(uuid.ToUpper() == MwsUuidStrings.CalibrationOneUuid)
             {
                 // Save the value.
                 string appData = FileSystem.Current.AppDataDirectory;
@@ -296,7 +304,7 @@ namespace MwsCompanionApp.Services
                     {
                         file.Write(value[0] + "\n\n\n\n");
                     }
-                    
+
                 }
                 else
                 {
@@ -403,6 +411,12 @@ namespace MwsCompanionApp.Services
                     this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid);
                 });
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateRange() 
+        {
+            await this.WriteValue(MwsUuidStrings.FollowerServiceUuid, MwsUuidStrings.FollowerRangeUuid, new byte[] { this.CurrentConnection.Range });
         }
 
         /// <inheritdoc/>

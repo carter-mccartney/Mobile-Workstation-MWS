@@ -1,4 +1,5 @@
-﻿using MwsCompanionApp.Interfaces;
+﻿using Android.Net.Wifi.Aware;
+using MwsCompanionApp.Interfaces;
 using MwsCompanionApp.Services;
 using System;
 using System.Collections.Generic;
@@ -101,6 +102,20 @@ namespace MwsCompanionApp.Objects
             }
         }
 
+        private byte _range;
+        /// <summary>
+        /// The range to follow.
+        /// </summary>
+        public byte Range 
+        {
+            get => this._range;
+            set 
+            {
+                this._range = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Creates a new instance of an MWS.
         /// </summary>
@@ -117,6 +132,7 @@ namespace MwsCompanionApp.Objects
             this.IsConnected = false;
             this.CanConnect = true;
             this.IsFollowing = false;
+            this.Range = 2;
         }
 
         /// <summary>
@@ -124,6 +140,7 @@ namespace MwsCompanionApp.Objects
         /// </summary>
         public void Connect()
         {
+            this.Range = (byte)int.Parse(Preferences.Default.Get("Range", "2"));
             this.CanConnect = false;
             this.Services.ConnectionService.Connect();
         }
@@ -186,6 +203,15 @@ namespace MwsCompanionApp.Objects
         {
             this.IsCalibrating = true;
             this.Services.ConnectionService.Calibrate(4);
+        }
+
+
+        public void UpdateRange()
+        {
+            // Set this as preferred range.
+            App.Current.Dispatcher.Dispatch(() => Preferences.Default.Set("Range", this.Range.ToString()));
+
+            this.Services.ConnectionService.UpdateRange();
         }
 
         /// <summary>

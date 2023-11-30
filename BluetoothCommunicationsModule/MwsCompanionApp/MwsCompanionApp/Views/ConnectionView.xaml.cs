@@ -146,4 +146,18 @@ public partial class ConnectionView : ContentView
     {
         this._viewModel.Calibrate4();
     }
+
+    /// <summary>
+    /// Changes the range of the MWS.
+    /// </summary>
+    /// <param name="sender">
+    /// The object invoking the event. This should be the range slider.
+    /// </param>
+    /// <param name="e">
+    /// Context for the event. This is ignored by this handler.
+    /// </param>
+    private void Range_Updated(object sender, EventArgs e) 
+    {
+        this._viewModel.UpdateRange();
+    }
 }

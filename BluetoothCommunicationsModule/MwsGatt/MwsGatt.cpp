@@ -109,6 +109,33 @@
 #include <example_interfaces/msg/int8.hpp>
 
 //
+// Logging
+//
+
+enum LogLevel
+{
+	Debug,
+	Verbose,
+	Normal,
+	ErrorsOnly
+};
+
+// Our log level - defaulted to 'Normal' but can be modified via command-line options
+LogLevel logLevel = Normal;
+
+// Our full set of logging methods (we just log to stdout)
+//
+// NOTE: Some methods will only log if the appropriate `logLevel` is set
+void LogDebug(const char *pText) { if (logLevel <= Debug) { std::cout << "  DEBUG: " << pText << std::endl; } }
+void LogInfo(const char *pText) { if (logLevel <= Verbose) { std::cout << "   INFO: " << pText << std::endl; } }
+void LogStatus(const char *pText) { if (logLevel <= Normal) { std::cout << " STATUS: " << pText << std::endl; } }
+void LogWarn(const char *pText) { std::cout << "WARNING: " << pText << std::endl; }
+void LogError(const char *pText) { std::cout << "!!ERROR: " << pText << std::endl; }
+void LogFatal(const char *pText) { std::cout << "**FATAL: " << pText << std::endl; }
+void LogAlways(const char *pText) { std::cout << "..Log..: " << pText << std::endl; }
+void LogTrace(const char *pText) { std::cout << "-Trace-: " << pText << std::endl; }
+
+//
 // Constants
 //
 
@@ -186,6 +213,7 @@ public:
 	// Sets a new range and publishes.
 	void setRange(double range)
 	{
+		LogDebug(("Sending Range: " + std::to_string(range)).c_str());
 		this->range = range;
 		example_interfaces::msg::Float64 message = example_interfaces::msg::Float64();
 		message.data = range;
@@ -423,33 +451,6 @@ static uint32_t cyclesSinceAcknowledge;
 
 // Whether an acknowledge is being awaited.
 static bool isAwaitingAcknowledge;
-
-//
-// Logging
-//
-
-enum LogLevel
-{
-	Debug,
-	Verbose,
-	Normal,
-	ErrorsOnly
-};
-
-// Our log level - defaulted to 'Normal' but can be modified via command-line options
-LogLevel logLevel = Normal;
-
-// Our full set of logging methods (we just log to stdout)
-//
-// NOTE: Some methods will only log if the appropriate `logLevel` is set
-void LogDebug(const char *pText) { if (logLevel <= Debug) { std::cout << "  DEBUG: " << pText << std::endl; } }
-void LogInfo(const char *pText) { if (logLevel <= Verbose) { std::cout << "   INFO: " << pText << std::endl; } }
-void LogStatus(const char *pText) { if (logLevel <= Normal) { std::cout << " STATUS: " << pText << std::endl; } }
-void LogWarn(const char *pText) { std::cout << "WARNING: " << pText << std::endl; }
-void LogError(const char *pText) { std::cout << "!!ERROR: " << pText << std::endl; }
-void LogFatal(const char *pText) { std::cout << "**FATAL: " << pText << std::endl; }
-void LogAlways(const char *pText) { std::cout << "..Log..: " << pText << std::endl; }
-void LogTrace(const char *pText) { std::cout << "-Trace-: " << pText << std::endl; }
 
 //
 // Signal handling

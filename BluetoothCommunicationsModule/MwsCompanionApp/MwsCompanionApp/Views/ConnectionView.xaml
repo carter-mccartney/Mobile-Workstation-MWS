@@ -48,7 +48,13 @@
 							   VerticalOptions="FillAndExpand">
 				<tabs:DelayedView VerticalOptions="Center">
 					<tabs:DelayedView.View>
-						<VerticalStackLayout>
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="50"/>
+								<RowDefinition Height="*"/>
+								<RowDefinition Height="50"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
 							<Button Text="Follow Me"
 									x:Name="FollowButton"
 									CornerRadius="200"
@@ -63,7 +69,8 @@
 									IsEnabled="{Binding IsDoingAnything, 
 														Mode=OneWay, 
 														UpdateSourceEventName=PropertyChanged, 
-														Converter={StaticResource NotConverter}}"/>
+														Converter={StaticResource NotConverter}}"
+									Grid.Row="1"/>
 							<Button Text="Stop Following"
 									x:Name="UnfollowButton"
 									CornerRadius="200"
@@ -73,8 +80,27 @@
 									Clicked="StopFollowingButton_Clicked"
 									IsVisible="{Binding IsFollowing, 
 														Mode=OneWay, 
-														UpdateSourceEventName=PropertyChanged}"/>
-						</VerticalStackLayout>
+														UpdateSourceEventName=PropertyChanged}"
+									Grid.Row="1"/>
+							<Grid Grid.Row="3">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								
+								<Label Text="Range"/>
+								<Slider Grid.Row="3"
+										HorizontalOptions="FillAndExpand"
+										Value="{Binding Range, 
+														Mode=TwoWay, 
+														UpdateSourceEventName=PropertyChanged}"
+										DragCompleted="Range_Updated"
+										Maximum="10"
+										Minimum="1"
+										class="Secondary"
+										Grid.Column="1"/>
+							</Grid>
+						</Grid>
 					</tabs:DelayedView.View>
 				</tabs:DelayedView>
 				<!--<tabs:DelayedView VerticalOptions="Center"

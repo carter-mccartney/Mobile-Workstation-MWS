@@ -180,7 +180,7 @@ namespace MwsCompanionApp.Services
                                                                                (followerAcknowledge.Properties & (GattProperty.Write | GattProperty.Notify)) != 0 &&
                                                                                (followerChangeAdvertisement.Properties & GattProperty.Notify) != 0 &&
                                                                                (followerIsActivated.Properties & (GattProperty.Read | GattProperty.Write | GattProperty.Notify)) != 0 &&
-                                                                               (followerRange.Properties & GattProperty.Read) != 0 &&
+                                                                               (followerRange.Properties & (GattProperty.Read | GattProperty.Write)) != 0 &&
                                                                                (followerSignature.Properties & GattProperty.Write) != 0 &&
                                                                                (messengerMessage.Properties & (GattProperty.Read | GattProperty.Notify)) != 0 &&
                                                                                (calibrationOne.Properties & (GattProperty.Write | GattProperty.Read)) != 0 &&

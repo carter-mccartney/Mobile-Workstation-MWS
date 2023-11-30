@@ -78,6 +78,14 @@ namespace MwsCompanionApp.Interfaces
         Task ExitFollowerMode();
 
         /// <summary>
+        /// Updates the following range.
+        /// </summary>
+        /// <returns>
+        /// A taskrepresenting the async state of the operation.
+        /// </returns>
+        Task UpdateRange();
+
+        /// <summary>
         /// Calibrates the given target.
         /// </summary>
         /// <param name="target">
