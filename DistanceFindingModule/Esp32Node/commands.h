@@ -288,6 +288,7 @@ namespace Esp32Commands
             d_2 = distance1;
             esp3 = esps[3];
             d_3 = distance4;
+		}
         else // distance4 is the shortest
         { // if the shortest distance is ESP4, then ESPS 2 and 3 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 4.
