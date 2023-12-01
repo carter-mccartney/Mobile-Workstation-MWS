@@ -405,8 +405,10 @@ namespace MwsCompanionApp.Services
             else if(uuid.ToUpper() == MwsUuidStrings.CalibrationIsCalibratingUuid) 
             {
                 // Read the new calibration values for later. Start with one and the rest are chained.
-                App.Current.Dispatcher.Dispatch(() => 
+                App.Current.Dispatcher.Dispatch(() =>
                 {
+                    // Stop advertising.
+                    this.StopAdvertisingLocation();
                     this.CurrentConnection.IsCalibrating = false;
                     this.ReadValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationOneUuid);
                 });
@@ -420,10 +422,30 @@ namespace MwsCompanionApp.Services
         }
 
         /// <inheritdoc/>
-        public async Task Calibrate(byte target) 
+        public async Task Calibrate(byte target)
         {
-            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationTargetUuid, new byte[] { target });
-            await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationIsCalibratingUuid, new byte[] { 0x01 });
+            // Write to the signature characteristic.
+            if(!(this.GenerateSignature() is byte[] value))
+            {
+                this._services.EventService.InvokeUIMessageDispatchedEvent(this, new UIMessageEventArgs("Error calibrating " + this.CurrentConnection.Name));
+            }
+            else
+            {
+                await this.WriteValue(MwsUuidStrings.FollowerServiceUuid, MwsUuidStrings.FollowerSignatureUuid, value);
+
+                // Start the advertisement.
+                if(this.StartAdvertisingLocation())
+                {
+                    // Send the calibration data.
+                    await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationTargetUuid, new byte[] { target });
+                    await this.WriteValue(MwsUuidStrings.CalibrationServiceUuid, MwsUuidStrings.CalibrationIsCalibratingUuid, new byte[] { 0x01 });
+                }
+                else
+                {
+                    // Notify about the error.
+                    this._services.EventService.InvokeUIMessageDispatchedEvent(this, new UIMessageEventArgs("Error calibrating " + this.CurrentConnection.Name));
+                }
+            }
         }
 
         /// <summary>

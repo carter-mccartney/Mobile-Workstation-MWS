@@ -233,6 +233,19 @@ namespace Esp32Commands
         double distance4 = std::stod(distanceString);
 
         // Find the smallest distance and use the two adjacent ESP32s.
+        /*
+            This displays the ESP locations from a Top-Down, Eagle-eye perspective.
+
+                        Back of MWS
+                3                           4
+
+                        Center
+
+
+                1                           2
+                        Front
+
+        */
         Esp esp1;
         Esp esp2;
         Esp esp3;
@@ -242,168 +255,49 @@ namespace Esp32Commands
         if(distance1 <= distance2 &&
         distance1 <= distance3 &&
         distance1 <= distance4) 
-        {
+        { // if the shortest distance is ESP1, then ESPS 2 and 3 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 1.
             esp1 = esps[0];
             d_1 = distance1;
-            //THIS SECTION SEEMS TO BE SWAPPING IF THEY SHARE AND X COORD BUT THEN CHECKS IF THEY DO NOT WHY.
-            // First one shares x-coordinate.
-            if(esps[1].x_coord == esp1.x_coord) 
-            {
-                esp2 = esps[1];
-                d_2 = distance2;
-            }
-            else if(esps[2].x_coord == esp1.x_coord) 
-            {
-                esp2 = esps[2];
-                d_2 = distance3;
-            }
-            else 
-            {
-                esp2 = esps[3];
-                d_2 = distance4;
-            }
-
-            // Other one shares y-coordinate.
-            if(esps[1].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[1];
-                d_3 = distance2;
-            }
-            else if(esps[2].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[2];
-                d_3 = distance3;
-            }
-            else
-            {
-                esp3 = esps[3];
-                d_3 = distance4;
-            }
+            esp2 = esps[1];
+            d_2 = distance2;
+            esp3 = esps[2];
+            d_3 = distance3;
         }
         else if(distance2 <= distance1 &&
                 distance2 <= distance3 &&
                 distance2 <= distance4) 
-        {
+        { // if the shortest distance is ESP2, then ESPS 1 and 4 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 2.
             esp1 = esps[1];
             d_1 = distance2;
+            esp2 = esps[0];
+            d_2 = distance1;
+            esp3 = esps[3];
+            d_3 = distance4;
 
-            // First one shares x-coordinate.
-            if(esps[0].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[0];
-                d_2 = distance1;
-            }
-            else if(esps[2].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[2];
-                d_2 = distance3;
-            }
-            else
-            {
-                esp2 = esps[3];
-                d_2 = distance4;
-            }
-
-            // Other one shares y-coordinate.
-            if(esps[0].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[0];
-                d_3 = distance1;
-            }
-            else if(esps[2].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[2];
-                d_3 = distance3;
-            }
-            else
-            {
-                esp3 = esps[3];
-                d_3 = distance4;
-            }
         }
         else if(distance3 <= distance1 &&
                 distance3 <= distance2 &&
                 distance3 <= distance4)
-        {
+        { // if the shortest distance is ESP3, then ESPS 1 and 4 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 3.
             esp1 = esps[2];
             d_1 = distance3;
-
-            // First one shares x-coordinate.
-            if(esps[1].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[1];
-                d_2 = distance2;
-            }
-            else if(esps[0].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[0];
-                d_2 = distance1;
-            }
-            else
-            {
-                esp2 = esps[3];
-                d_2 = distance4;
-            }
-
-            // Other one shares y-coordinate.
-            if(esps[1].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[1];
-                d_3 = distance2;
-            }
-            else if(esps[0].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[0];
-                d_3 = distance1;
-            }
-            else
-            {
-                esp3 = esps[3];
-                d_3 = distance4;
-            }
-        }
-        else 
-        {
+            esp2 = esps[0];
+            d_2 = distance1;
+            esp3 = esps[3];
+            d_3 = distance4;
+        else // distance4 is the shortest
+        { // if the shortest distance is ESP4, then ESPS 2 and 3 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 4.
             esp1 = esps[3];
             d_1 = distance4;
+            esp2 = esps[1];
+            d_2 = distance2;
+            esp3 = esps[2];
+            d_3 = distance3;
 
-            // First one shares x-coordinate.
-            if(esps[1].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[1];
-                d_2 = distance2;
-            }
-            else if(esps[2].x_coord == esp1.x_coord)
-            {
-                esp2 = esps[2];
-                d_2 = distance3;
-            }
-            else
-            {
-                esp2 = esps[0];
-                d_2 = distance1;
-            }
-
-            // Other one shares y-coordinate.
-            if(esps[1].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[1];
-                d_3 = distance2;
-            }
-            else if(esps[2].y_coord == esp1.y_coord)
-            {
-                esp3 = esps[2];
-                d_3 = distance3;
-            }
-            else
-            {
-                esp3 = esps[0];
-                d_3 = distance1;
-            }
         }
 
         // Find the coordinate pair of the point.

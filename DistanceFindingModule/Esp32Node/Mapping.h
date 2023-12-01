@@ -18,22 +18,12 @@ namespace Mapping
      * Produces the approximate coordinates formed by the intersection of the three circles : (x - x_1) ^ 2 + (y - y_1) ^ 2 = d_1 ^ 2,
      * (x - x_2)^2 + (y - y_2)^2 = d_2^2,and (x - x_3)^2 + (y - y_3)^2 = d_3^2.
      *
-     */CoordinatePair findIntersection(double x_1, double y_1, double x_2, double y_2, double x_3, double y_3, double d_1, double d_2, double d_3)
+     */CoordinatePair findIntersection(double X_1, double Y_1, double X_2, double Y_2, double X_3, double Y_3, double d_1, double d_2, double d_3)
     {
          //I think the problem is what is being passed in not the math itself. will test with more print statements tomorrow
         bool isOneValid = false;;
         bool isTwoValid = false;
         CoordinatePair pairs[2];
-
-        //change from doubles to int to be use take the last 3 decimals
-        //makes the first x_1 and y_1 the shortest values and subtract those from the distances. 
-        //comes in as millimeters just change into an int for the rest of run, could use casting 
-        int X_1 = x_1;
-        int Y_1 = y_1;
-        int X_2 = x_2;
-        int Y_2 = y_2;
-        int X_3 = x_3;
-        int Y_3 = y_3;
 
         // Shift coordinate system so that (x_1, y_1) is center. 
         X_3 -= X_1;
