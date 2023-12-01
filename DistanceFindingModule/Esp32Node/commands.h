@@ -108,8 +108,8 @@ namespace Esp32Commands
                     }
                 }
             }
-            catch(const LibSerial::AlreadyOpen& ex) {}
-            catch(const LibSerial::OpenFailed& ex) {}
+            catch (const LibSerial::AlreadyOpen& ex) { printf("Path already opened \n"); }
+            catch (const LibSerial::OpenFailed& ex) { printf("Serial Port failed on open\n"); }
 
 
             if(isPortOpen)
@@ -204,22 +204,31 @@ namespace Esp32Commands
         esps[3].port->FlushIOBuffers();
         esps[3].port->Write("DISTANCE\n");
 
+        //TO DO: Change the code to work without a potential lock up
+
+
+
         // Read the result from each.
-        while(!esps[0].port->IsDataAvailable()) usleep(100000);
+        usleep(12000000);//sleep for the appropriate time 
         string distanceString;
-        esps[0].port->ReadLine(distanceString, '\n');
+        esps[0].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
+        while(!esps[0].port->IsDataAvailable()) usleep(10000);
+
         esps[0].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance1 = std::stod(distanceString);
-        while(!esps[1].port->IsDataAvailable()) usleep(100000);
-        esps[1].port->ReadLine(distanceString, '\n');
+        esps[1].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
+        while(!esps[1].port->IsDataAvailable()) usleep(10000);
+        
         esps[1].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance2 = std::stod(distanceString);
-        while(!esps[2].port->IsDataAvailable()) usleep(100000);
-        esps[2].port->ReadLine(distanceString, '\n');
+        esps[2].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
+        while(!esps[2].port->IsDataAvailable()) usleep(10000);
+       
         esps[2].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance3 = std::stod(distanceString);
-        while(!esps[3].port->IsDataAvailable()) usleep(100000);
-        esps[3].port->ReadLine(distanceString, '\n');
+        esps[3].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
+        while(!esps[3].port->IsDataAvailable()) usleep(10000);
+       
         esps[3].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance4 = std::stod(distanceString);
 
@@ -237,7 +246,7 @@ namespace Esp32Commands
             // Find intersection with two adjacent ESP32s to ESP 1.
             esp1 = esps[0];
             d_1 = distance1;
-
+            //THIS SECTION SEEMS TO BE SWAPPING IF THEY SHARE AND X COORD BUT THEN CHECKS IF THEY DO NOT WHY.
             // First one shares x-coordinate.
             if(esps[1].x_coord == esp1.x_coord) 
             {
@@ -408,9 +417,12 @@ namespace Esp32Commands
     {
         esp.port->FlushIOBuffers();
         esp.port->Write("CALIBRATE\n");
+        string calibrationOutput;
+        esp.port->ReadLine(calibrationOutput, '\n');
+        usleep(40000000);//sleep for longer.
         while(!esp.port->IsDataAvailable()) usleep(1000);
 
-        string calibrationOutput;
+      
         esp.port->ReadLine(calibrationOutput, '\n');
         esp.port->ReadLine(calibrationOutput, '\n'); // Read twice due to ESP#2 bug.
 

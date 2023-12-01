@@ -20,6 +20,7 @@ namespace Mapping
      *
      */CoordinatePair findIntersection(double x_1, double y_1, double x_2, double y_2, double x_3, double y_3, double d_1, double d_2, double d_3)
     {
+         //I think the problem is what is being passed in not the math itself. will test with more print statements tomorrow
         bool isOneValid = false;;
         bool isTwoValid = false;
         CoordinatePair pairs[2];
