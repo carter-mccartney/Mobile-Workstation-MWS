@@ -9,7 +9,6 @@
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
-#include <unistd.h>
 
 #include <stdio.h>      // standard input / output functions
 #include <stdlib.h>
@@ -19,10 +18,47 @@
 #include <errno.h>      // Error number definitions
 #include <termios.h>    // POSIX terminal control definitions
 
+#include <libserial/SerialPort.h>
+#include <experimental/filesystem>
+#include <vector>
+
+namespace fs = std::experimental::filesystem;
+
+std::vector<std::string> get_available_ports()
+{
+  std::vector<std::string> port_names;
+
+  fs::path p("/dev/serial/by-id");
+  try
+  {
+    if (exists(p))
+    {
+      for (auto de : fs::directory_iterator(p))
+      {
+        if (is_symlink(de.symlink_status()))
+        {
+          fs::path symlink_points_at = read_symlink(de);
+          fs::path canonical_path = fs::canonical(p / symlink_points_at);
+          // cout << canonical_path.generic_string() << std::endl;
+          port_names.push_back(canonical_path.generic_string());
+        }
+      }
+    }
+  }
+  catch (const fs::filesystem_error &ex)
+  {
+    std::cout << ex.what() << '\n';
+    throw ex;
+  }
+
+  return port_names;
+}
+
 class ArduinoComms
 {
 
 private:
+  LibSerial::SerialPort* port = nullptr;
   std::string portName = "";
   int fd = 0;
   #define BUFFER_SIZE  1024
@@ -30,6 +66,79 @@ private:
   /* Number of milliseconds to wait to return if a line termination character is not read
    * from a read operation on a serial port. */
   const size_t MILLISECOND_TIMEOUT = 0;
+
+  bool findSerialPort()
+  {
+    bool isPortFound = false;
+    std::string seriaPortName = "";
+
+    // Get all ports available to find the correct one.
+    std::vector<std::string> listOfPorts = get_available_ports();
+    for (long unsigned int i = 0; i < listOfPorts.size(); i++)
+    {
+      // Open the port.
+      bool isPortOpen = false;
+      try
+      {
+        if(this->port == nullptr)
+        {
+            this->port = new LibSerial::SerialPort();
+        }
+        this->port->Open(listOfPorts[i]);
+        isPortOpen = true;
+        this->port->FlushIOBuffers();
+
+        usleep(1000000); // Enough time for setup for port to open. ***IMPORTANT***
+
+        // Set port parameters.
+        this->port->SetBaudRate(LibSerial::BaudRate::BAUD_38400);
+        this->port->SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_DEFAULT);
+        this->port->SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_DEFAULT);
+        this->port->SetParity(LibSerial::Parity::PARITY_DEFAULT);
+        this->port->SetStopBits(LibSerial::StopBits::STOP_BITS_DEFAULT);
+
+        // Write the ID command.
+        this->port->FlushIOBuffers();
+        this->port->Write("ID\n");
+
+        // Wait a reasonable time for a response.
+        usleep(1000000); // 1 second for now.
+
+        std::string line = "";
+
+        // If no response, do nothing.
+        if (this->port->IsDataAvailable())
+        {
+          // Check the response given.
+          this->port->ReadLine(line, '\n', MILLISECOND_TIMEOUT);
+
+          // If specific response found, this is the correct port.
+          if (line == "This is Arduino\n")
+          {
+            isPortFound = true;
+            this->port->GetFileDescriptor();
+            this->port->Close();
+            break;
+          }
+        }
+      }
+      catch(const LibSerial::AlreadyOpen& ex){}
+      catch(const LibSerial::OpenFailed& ex){}
+
+      if(isPortOpen)
+      {
+        // Close port if not correct.
+        this->port->Close();
+      }
+    }
+
+    if(!isPortFound)
+    {
+      delete this->port;
+      this->port = nullptr;
+    }
+    return isPortFound;
+  }
 
 public:
 
@@ -43,6 +152,20 @@ public:
   int connect(const char port_name[])
   {
     std::cout << "In the connect function." << std::endl;
+
+    // If the port has not been found, then...
+    if (!this->findSerialPort())
+    {
+      // TODO: Light indicator that tells the user of the MWS that the Raspberry Pi is not connected to the Arduino.
+
+      /* Failed to find the arduino serial port. */
+      std::cout << "Failed to find serial port." << std::endl;
+      return -1;
+    }
+    else
+    {
+      std::cout << "Found serial port." << std::endl;
+    }
 
     /* Open the port with file flags 'O_RDWR' which grant read and write permissions 
      * and 'O_NOCTTY' if the path-name refers to a 'terminal device-see' aka, a 'tty'.
