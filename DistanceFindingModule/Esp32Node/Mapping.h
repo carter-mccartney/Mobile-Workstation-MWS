@@ -1,5 +1,5 @@
 #include <math.h>
-
+//Carter Comment
 namespace Mapping 
 {
     // The value of the mathematical constant pi.
@@ -21,7 +21,7 @@ namespace Mapping
      */CoordinatePair findIntersection(double X_1, double Y_1, double X_2, double Y_2, double X_3, double Y_3, double d_1, double d_2, double d_3)
     {
          //I think the problem is what is being passed in not the math itself. will test with more print statements tomorrow
-        bool isOneValid = false;;
+        bool isOneValid = false;
         bool isTwoValid = false;
         CoordinatePair pairs[2];
 
