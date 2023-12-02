@@ -6,9 +6,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra)
 endif()
 
-link_libraries(stdc++fs)
-link_libraries(serial)
-
 # List of dependancies to find.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface

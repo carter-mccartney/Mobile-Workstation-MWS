@@ -13,6 +13,13 @@ class Wheel
     double cmd = 0;
     double pos = 0;
     double vel = 0;
+    long tach = 0;
+
+    /* Radius of wheels: 0.0735 meters
+     * Pi: 3.141526535
+     * Encoder counts per revolution: 6
+     */
+    const double metersPerCount = (0.0735 * 2 * 3.141526535) / 6;
     
     /* Variables below are not needed since we won't be returning state values to the controller.
     int enc = 0;
