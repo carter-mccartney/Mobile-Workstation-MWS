@@ -1,4 +1,7 @@
 #include <math.h>
+#include <string>
+#include <cstring>
+#include <iostream>
 
 namespace Mapping 
 {
@@ -18,7 +21,8 @@ namespace Mapping
      * Produces the approximate coordinates formed by the intersection of the three circles : (x - x_1) ^ 2 + (y - y_1) ^ 2 = d_1 ^ 2,
      * (x - x_2)^2 + (y - y_2)^2 = d_2^2,and (x - x_3)^2 + (y - y_3)^2 = d_3^2.
      *
-     */CoordinatePair findIntersection(double X_1, double Y_1, double X_2, double Y_2, double X_3, double Y_3, double d_1, double d_2, double d_3)
+     */
+    CoordinatePair findIntersection(double X_1, double Y_1, double X_2, double Y_2, double X_3, double Y_3, double d_1, double d_2, double d_3)
     {
          //I think the problem is what is being passed in not the math itself. will test with more print statements tomorrow
         bool isOneValid = false;;
@@ -33,6 +37,11 @@ namespace Mapping
         X_1 -= X_1;
         Y_1 -= Y_1;
 
+        printf("Shifting\n");
+        printf("%3.2f, %3.2f\n", X_1, Y_1);
+        printf("%3.2f, %3.2f\n", X_2, Y_2);
+        printf("%3.2f, %3.2f\n", X_3, Y_3);
+
         //needs confirmation that location of X_2  and Y_2 is never zero if so swap 
         //Formula is now
         // x^2 +y^2 = d_1^2
@@ -43,14 +52,21 @@ namespace Mapping
         // Use the closer coordinate first.
         if(X_2 != 0)
         {
+            printf("X_2 greater than 0");
+
             //subtract out the x and solve for y first then x
             double squareD_1 = d_1 * d_1;
             double squareD_2 = d_2 * d_2;
-            double foundX = (squareD_1 - squareD_2 + (double)X_2 * (double)X_2) / (2 * ((double)X_2));
+            printf("Distances Squared: %3.2f, %3.2f\n", squareD_1, squareD_2);
+            printf("Xi Squared: %3.2f\n", X_2 * X_2);
+            double intermediateSqureSum = squareD_1 - squareD_2 + X_2 * X_2;
+            printf("Sum of Squares: %3.2f\n", intermediateSqureSum);
+            double foundX = (intermediateSqureSum) / (2 * X_2);
             pairs[0].x = foundX;
 
-            // Plug back in to x^2+y^2=d_1^2 solve for y.
-            double squareFoundX = foundX * foundX;
+            // Plug back in to (x-x_1)^2+y^2=d_1^2 solve for y.
+            double differenceX = foundX - X_2;
+            double squareFoundX = differenceX * differenceX;
             double foundY_1 = sqrt(squareD_1 - squareFoundX);
 
             if(foundY_1 == 0)
@@ -103,7 +119,7 @@ namespace Mapping
                 }
             }
         }
-        else // In this case, Y_2 must be zero since the point is not the same point.
+        else // In this case, Y_2 must not be zero since the point is not the same point.
         {
             //subtract out the y and solve for x first then y
             double squareD_1 = d_1 * d_1;
@@ -112,7 +128,8 @@ namespace Mapping
             pairs[0].y = foundY;
 
             // Plug back in to x^2+y^2=d_1^2 solve for x.
-            double squareFoundY = foundY * foundY;
+            double differenceY = foundY - Y_2;
+            double squareFoundY = differenceY * differenceY;
             double foundX_1 = sqrt(squareD_1 - squareFoundY);
 
             if(foundX_1 == 0)
@@ -176,7 +193,8 @@ namespace Mapping
             pairs[1].x = foundX;
 
             // Plug back in to x^2+y^2=d_1^2 solve for y.
-            double squareFoundX = foundX * foundX;
+            double differenceX = foundX - X_3;
+            double squareFoundX = differenceX * differenceX;
             double foundY_1 = sqrt(squareD_1 - squareFoundX);
 
             if(foundY_1 == 0)
@@ -238,7 +256,8 @@ namespace Mapping
             pairs[1].y = foundY;
 
             // Plug back in to x^2+y^2=d_1^2 solve for x.
-            double squareFoundY = foundY * foundY;
+            double differenceY = foundY - Y_3;
+            double squareFoundY = differenceY * differenceY;
             double foundX_1 = sqrt(squareD_1 - squareFoundY);
 
             if(foundX_1 == 0)
