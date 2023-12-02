@@ -281,18 +281,6 @@ namespace Esp32Commands
 
         }
 
-        // Confirm that the 3 distances are in order shortest to longest
-        if (d_2 < d_3)
-        {
-            Esp swap = esp2;
-            esp2 = esp3;
-            esp3 = swap;
-
-            double d_swap = d_2;
-            d_2 = d_3;
-            d_3 = d_swap;
-        }
-
         // Find the coordinate pair of the point.
         printf("Finding intersection: %s %3.2f %s %3.2f %s %3.2f\n", esp1.Name.c_str(), d_1, esp2.Name.c_str(), d_2, esp3.Name.c_str(), d_3);
         return Mapping::findIntersection(esp1.x_coord, esp1.y_coord, 
