@@ -54,6 +54,7 @@ namespace Esp32Commands
     */
     bool findSerialPort(Esp& esp)
     {
+    	printf("Attempting to find %s\n", esp.Name.c_str());
         bool isPortFound = false;
         std::string seriaPortName = "";
 
@@ -70,6 +71,7 @@ namespace Esp32Commands
                 }
 
                 // Open the port.
+    		printf("Attempting to open %s\n", listOfPorts[i].c_str());
                 esp.port->Open(listOfPorts[i]);
                 isPortOpen = true;
                 esp.port->FlushIOBuffers();
@@ -85,6 +87,7 @@ namespace Esp32Commands
 
                 //Write the ID command.
                 esp.port->FlushIOBuffers();
+    		printf("Sending ID\n");
                 esp.port->Write("ID\n");
 
                 // Wait a reasonable time for a response.
@@ -99,6 +102,7 @@ namespace Esp32Commands
                     // ESP32 has a bug in serial communications, so read to the end of the line to get the data we actually want.
                     esp.port->ReadLine(line, '\n');
                     esp.port->ReadLine(line, '\n');
+		    printf("Returned %s\n", line.c_str());
 
                     // If specific response found, this is the correct port.
                     if(line == (esp.Name + "\n"))
@@ -127,50 +131,26 @@ namespace Esp32Commands
         return isPortFound;
     }
 
-    // Loads the location of the ESP.
-    void locationFinding(Esp& esp)
-    {
-        string fileName = "~/MwsConfig/ESP" + esp.Name + ".txt";
-        std::ifstream file;
-        file.open(fileName, std::ifstream::in);
-
-        if(file.is_open())
-        {
-            char length[16];
-            for(int i = 0; i < 16; i++)
-            {
-                length[i] = '\0';
-            }
-            file.getline(length, 15);
-            double num = std::atof(length);
-
-            esp.x_coord = num;
-            for(int i = 0; i < 16; i++)
-            {
-                length[i] = '\0';
-            }
-            file.getline(length, 15);
-            num = std::atof(length);
-            esp.y_coord = num;
-        }
-    }
-
     bool init() 
     {
         //for the location finding show the trilateration working with the ESPArray points in 
         //a solid state enviroment
-        locationFinding(esps[0]);
         esps[0].number = 1;
         esps[0].Name = "One";
-        locationFinding(esps[1]);
+        esps[0].x_coord = -0.29;
+        esps[0].y_coord = -0.30;
         esps[1].number = 2;
         esps[1].Name = "Two";
-        locationFinding(esps[2]);
+        esps[1].x_coord = 0.29;
+        esps[1].y_coord = -0.30;
         esps[2].number = 3;
         esps[2].Name = "Three";
-        locationFinding(esps[3]);
+        esps[2].x_coord = -0.29;
+        esps[2].y_coord = 0.30;
         esps[3].number = 4;
         esps[3].Name = "Four";
+        esps[3].x_coord = 0.29;
+        esps[3].y_coord = 0.30;
 
         //check to see if all names can be found 
         return findSerialPort(esps[0]) &&
@@ -288,7 +268,7 @@ namespace Esp32Commands
             d_2 = distance1;
             esp3 = esps[3];
             d_3 = distance4;
-		}
+	}
         else // distance4 is the shortest
         { // if the shortest distance is ESP4, then ESPS 2 and 3 are adjacent, so use those.
             // Find intersection with two adjacent ESP32s to ESP 4.
@@ -314,6 +294,7 @@ namespace Esp32Commands
         }
 
         // Find the coordinate pair of the point.
+        printf("Finding intersection: %s %3.2f %s %3.2f %s %3.2f\n", esp1.Name.c_str(), d_1, esp2.Name.c_str(), d_2, esp3.Name.c_str(), d_3);
         return Mapping::findIntersection(esp1.x_coord, esp1.y_coord, 
                                         esp2.x_coord, esp2.y_coord, 
                                         esp3.x_coord, esp3.y_coord, 
