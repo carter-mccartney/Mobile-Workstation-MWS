@@ -241,8 +241,10 @@ void getPosition()
     while(isRunning)
     {
         // Get the goal.
+        std::cout << "Finding point" << std::endl;
         Mapping::CoordinatePair goal = Esp32Commands::findGoal();
-
+        std::cout << "Found x value " << goal.x << "\n";
+        std::cout << "Found y value " << goal.y <<"\n";
         // Adjust to the rotation of the coordinate system.
         geometry_msgs::msg::PoseStamped pose;
         pose.header.frame_id = "base_link";
