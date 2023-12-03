@@ -19,6 +19,7 @@
 #include <limits>
 #include <memory>
 #include <vector>
+#include <unistd.h>
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -138,12 +139,6 @@ namespace diffdrive_arduino
         const rclcpp_lifecycle::State & /*previous_state*/)
     {
         RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Activating ...please wait...");
-        
-        if (!comms_.connected())
-        {
-            RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "ERROR: Arduino microcontroller not connected in 'on_activate' callback in hardware interface.");
-            return hardware_interface::CallbackReturn::ERROR;
-        }
 
         RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully activated!");
 
@@ -165,6 +160,9 @@ namespace diffdrive_arduino
         {
             return hardware_interface::return_type::ERROR;
         }
+
+        // Send the read command.
+        comms_.send_msg("\nR\n");
 
         /* Receive current motor velocity values from the Arduino. */
         if (comms_.read_motor_velocities(&wheel_l_.vel, &wheel_r_.vel) != 0)

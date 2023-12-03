@@ -1,3 +1,28 @@
+# Copyright 2020 ros2_control Development Team
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Useful article about launch files: https://roboticsbackend.com/ros2-launch-file-example/
+
+import os
+
+from launch import LaunchDescription
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
+from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -15,17 +40,27 @@ from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
 
 
-
 def generate_launch_description():
+    # Get URDF via xacro
+    robot_description_content = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare("mws_robot"), "description", "mws_robot.urdf.xacro"]
+            ),
+        ]
+    )
+    robot_description = {"robot_description": robot_description_content}
 
-
-    # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
-    # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
+    robot_controllers = PathJoinSubstitution(
+        [
+            FindPackageShare("mws_robot"),
+            "params",
+            "diffbot_controllers.yaml",
+        ]
+    )
     robot_dir = get_package_share_directory('mws_robot')
-    pkg_path = os.path.join(robot_dir)
-    xacro_file = os.path.join(pkg_path,'description','mws_robot.urdf.xacro')
-    robot_description_config = Command(['xacro ', xacro_file])
-    robot_description = {"robot_description": robot_description_config}
 
     default_config_topics = os.path.join(robot_dir, 'params', 'twist_mux_topics.yaml')
     twist_mux = Node(
@@ -37,48 +72,39 @@ def generate_launch_description():
             ]
         )
 
-    controller_params_file = os.path.join(robot_dir,'params','diffbot_controllers.yaml')
-
-    controller_manager = Node(
+    control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[controller_params_file,
-                    robot_description]
+        parameters=[robot_description, robot_controllers],
+        output="both",
     )
 
-    diff_drive_spawner = Node(
+    joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["diffbot_base_controller", "joint_state_broadcaster"]
+        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
     )
 
-    delayed_diff_drive_spawner = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=controller_manager,
-            on_start=[TimerAction(period=20.0, actions=[diff_drive_spawner])],
+    robot_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
+    )
+
+    # Delay start of robot_controller after `joint_state_broadcaster`
+    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=joint_state_broadcaster_spawner,
+            on_exit=[robot_controller_spawner],
         )
     )
 
 
-    # Code for delaying a node (I haven't tested how effective it is)
-    # 
-    # First add the below lines to imports
-    # from launch.actions import RegisterEventHandler
-    # from launch.event_handlers import OnProcessExit
-    #
-    # Then add the following below the current diff_drive_spawner
-    # delayed_diff_drive_spawner = RegisterEventHandler(
-    #     event_handler=OnProcessExit(
-    #         target_action=spawn_entity,
-    #         on_exit=[diff_drive_spawner],
-    #     )
-    # )
-    #
-    # Replace the diff_drive_spawner in the final return with delayed_diff_drive_spawner
-
-    # Launch them all!
-    return LaunchDescription([
+    nodes = [
         twist_mux,
-        controller_manager,
-        delayed_diff_drive_spawner
-    ])
+        control_node,
+        joint_state_broadcaster_spawner,
+        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+    ]
+
+    return LaunchDescription(nodes)

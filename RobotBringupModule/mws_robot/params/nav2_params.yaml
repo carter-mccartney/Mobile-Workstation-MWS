@@ -2,8 +2,8 @@ bt_navigator:
   ros__parameters:
     global_frame: odom
     robot_base_frame: base_link
-    odom_topic: /diffbot_base_controller/odom
-    bt_loop_duration: 10
+    odom_topic: /diff_drive_controller/odom
+    bt_loop_duration: 500
     default_server_timeout: 20
     action_server_result_timeout: 3600.0
     default_nav_to_pose_bt_xml: "/home/developer/BehaviorTrees/navigate_to_pose_w_replanning_and_recovery.xml"
@@ -66,6 +66,8 @@ bt_navigator:
       - nav2_assisted_teleop_cancel_bt_node
       - nav2_drive_on_heading_cancel_bt_node
       - nav2_is_battery_charging_condition_bt_node
+      - range_updater_decorator_bt_node
+      - truncate_path_custom_action_bt_node
     error_code_names:
       - compute_path_error_code
       - follow_path_error_code
@@ -73,12 +75,12 @@ bt_navigator:
 controller_server:
   ros__parameters:
     action_server_result_timeout: 900.0
-    controller_frequency: 5.0
+    controller_frequency: 2.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
     failure_tolerance: -1.0
-    odom_topic: "diffbot_base_controller/odom"
+    odom_topic: "diff_drive_controller/odom"
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["general_goal_checker"] # "precise_goal_checker"
     controller_plugins: ["FollowPath"]
@@ -140,7 +142,7 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 5.0
+      update_frequency: 2.0
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
@@ -177,8 +179,8 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 0.001
+      publish_frequency: 0.001
       global_frame: odom
       robot_base_frame: base_link
       robot_radius: 0.36
@@ -214,7 +216,7 @@ global_costmap:
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 5.0
+    expected_planner_frequency: 2.0
     planner_plugins: ["GridBased"]
     action_server_result_timeout: 900.0
     GridBased:
