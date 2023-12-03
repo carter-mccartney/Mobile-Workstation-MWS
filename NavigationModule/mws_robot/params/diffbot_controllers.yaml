@@ -24,13 +24,13 @@ diffbot_base_controller:
     # Shortest distance between the left and right wheels. 
     # If this parameter is wrong, the robot will not behave correctly in curves.
     # The diff_drive_controller will attempt to read the value from the URDF if this parameter is not specified 
-    wheel_separation: 0.297
+    wheel_separation: 0.49
     
     # Radius of a wheel, 
     # i.e., wheels size, used for transformation of linear velocity into wheel rotations. 
     # If this parameter is wrong the robot will move faster or slower then expected.
     # diff_drive_controller will attempt to read the value from the URDF if this parameter is not specified.
-    wheel_radius: 0.033 
+    wheel_radius: 0.0735 
 
     # Correction factor for wheel separation.
     wheel_separation_multiplier: 1.0
@@ -84,8 +84,8 @@ diffbot_base_controller:
     linear.x.has_jerk_limits: true
     linear.x.max_velocity: 1.5
     linear.x.min_velocity: -1.5
-    linear.x.max_acceleration: 0.03
-    linear.x.min_acceleration: -0.03
+    linear.x.max_acceleration: 0.26
+    linear.x.min_acceleration: -0.26
     linear.x.max_jerk: 2.0
     linear.x.min_jerk: -2.0
 
@@ -94,7 +94,7 @@ diffbot_base_controller:
     angular.z.has_jerk_limits: true
     angular.z.max_velocity: 1.5
     angular.z.min_velocity: -1.5
-    angular.z.max_acceleration: 0.03
-    angular.z.min_acceleration: -0.03
+    angular.z.max_acceleration: 0.26
+    angular.z.min_acceleration: -0.26
     angular.z.max_jerk: 2.0
     angular.z.min_jerk: -2.0

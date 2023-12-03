@@ -4,6 +4,9 @@
 #ifndef DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
 #define DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
 
+
+#define BUFFER_SIZE  1024
+
 #include <cstring>
 #include <cstdlib>
 #include <sstream>
@@ -13,39 +16,9 @@
 #include <experimental/filesystem>
 #include <string>
 #include <vector>
+#include <stdlib.h>
 
 namespace fs = std::experimental::filesystem;
-
-std::vector<std::string> get_available_ports()
-{
-    std::vector<std::string> port_names;
-
-    fs::path p("/dev/serial/by-id");
-    try
-    {
-
-        if (exists(p))
-        {
-            for (auto de : fs::directory_iterator(p))
-            {
-                if (is_symlink(de.symlink_status()))
-                {
-                    fs::path symlink_points_at = read_symlink(de);
-                    fs::path canonical_path = fs::canonical(p / symlink_points_at);
-                    // cout << canonical_path.generic_string() << std::endl;
-                    port_names.push_back(canonical_path.generic_string());
-                }
-            }
-        }
-    }
-    catch (const fs::filesystem_error &ex)
-    {
-        std::cout << ex.what() << '\n';
-        throw ex;
-    }
-
-    return port_names;
-}
 
 class ArduinoComms
 {
@@ -63,62 +36,59 @@ private:
         std::string seriaPortName = "";
 
         // Get all ports available to find the correct one.
-        std::vector<std::string> listOfPorts = get_available_ports();
-        for (long unsigned int i = 0; i < listOfPorts.size(); i++)
+        std::string symbolicPath = "/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_5593034353635170C0D0-if00";
+        char* path = realpath(symbolicPath.c_str(), NULL);
+
+        // Open the port.
+        bool isPortOpen = false;
+        try
         {
-            // Open the port.
-            bool isPortOpen = false;
-            try
+            if(this->port == nullptr)
             {
-                if(this->port == nullptr)
-                {
-                    this->port = new LibSerial::SerialPort();
-                }
-                this->port->Open(listOfPorts[i]);
-                isPortOpen = true;
-                this->port->FlushIOBuffers();
-
-                usleep(1000000); // Enough time for setup for port to open. ***IMPORTANT***
-
-                // Set port parameters.
-                this->port->SetBaudRate(LibSerial::BaudRate::BAUD_9600);
-                this->port->SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_DEFAULT);
-                this->port->SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_DEFAULT);
-                this->port->SetParity(LibSerial::Parity::PARITY_DEFAULT);
-                this->port->SetStopBits(LibSerial::StopBits::STOP_BITS_DEFAULT);
-
-                // Write the ID command.
-                this->port->FlushIOBuffers();
-                this->port->Write("ID\n");
-
-                // Wait a reasonable time for a response.
-                usleep(1000000); // 1 second for now.
-
-                std::string line = "";
-
-                // If no response, do nothing.
-                if (this->port->IsDataAvailable())
-                {
-                    // Check the response given.
-                    this->port->ReadLine(line, '\n', MILLISECOND_TIMEOUT);
-
-                    // If specific response found, this is the correct port.
-                    if (line == "This is Arduino\n")
-                    {
-                        isPortFound = true;
-                        break;
-                    }
-                }
+                this->port = new LibSerial::SerialPort();
             }
-            catch(const LibSerial::AlreadyOpen& ex){}
-            catch(const LibSerial::OpenFailed& ex){}
+            this->port->Open(std::string(path));
+            free(path);
+            isPortOpen = true;
+            this->port->FlushIOBuffers();
 
-            if(isPortOpen)
+            usleep(1000000); // Enough time for setup for port to open. ***IMPORTANT***
+
+            // Set port parameters.
+            this->port->SetBaudRate(LibSerial::BaudRate::BAUD_9600);
+            this->port->SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_DEFAULT);
+            this->port->SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_DEFAULT);
+            this->port->SetParity(LibSerial::Parity::PARITY_DEFAULT);
+            this->port->SetStopBits(LibSerial::StopBits::STOP_BITS_DEFAULT);
+
+            // Write the ID command.
+            this->port->FlushIOBuffers();
+            this->port->Write("ID\n");
+
+            // Wait a reasonable time for a response.
+            usleep(1000000); // 1 second for now.
+
+            std::string line = "";
+
+            // If no response, do nothing.
+            if (this->port->IsDataAvailable())
             {
-                // Close port if not correct.
-                this->port->Close();
+                // Check the response given.
+                this->port->ReadLine(line, '\n', MILLISECOND_TIMEOUT);
+
+                // If specific response found, this is the correct port.
+                if (line == "This is Arduino\n")
+                {
+                    isPortFound = true;
+                }
+                else
+                {
+                    this->port->Close();
+                }
             }
         }
+        catch(const LibSerial::AlreadyOpen& ex){}
+        catch(const LibSerial::OpenFailed& ex){}
 
         if(!isPortFound)
         {
@@ -170,12 +140,40 @@ public:
     }
 
     /* Receives a message string through the serial port. */
-    void receive_msg(std::string &msg_to_receive)
+    int receive_msg(unsigned char response[BUFFER_SIZE])
     {
-        if(this->connected())
+        int n = 0;
+        int index = 0;
+        unsigned char buffer = '\0';
+        unsigned char TERMINATING_CHARACTER = '\n';
+        errno = 0;
+
+        /* Set all bytes of the response array to null terminating characters. */
+        memset(response, '\0', BUFFER_SIZE);
+
+        int fd = this->port->GetFileDescriptor();
+        do 
         {
-            this->port->ReadLine(msg_to_receive, '\n', MILLISECOND_TIMEOUT);
-        }
+        /* Iterate through the response until either we find a terminating character, there's no more characters to read, or the buffer is full. */
+            n = read(fd, &buffer, 1); // Read from the 'tty' file. Documented in: https://man7.org/linux/man-pages/man2/read.2.html
+            if (n < 0)
+            {
+            std::cout << "Error reading: " << strerror(errno) << std::endl;
+            return -1;
+            }
+            else if (n == 0)
+            {
+            break;
+            }
+            else
+            {
+            response[index] = buffer;
+            index++;
+            }
+        } while(buffer != TERMINATING_CHARACTER && index < BUFFER_SIZE);
+
+        std::cout << "Response: " << response << std::endl;
+        return 0;
     }
 
     /* Sends a message string through the serial port. */
@@ -197,6 +195,127 @@ public:
         std::stringstream ss;
         ss << "V" << left_motor_rpm << "," << right_motor_rpm << "\n";
         this->send_msg(ss.str());
+    }
+
+    /* Reads in tachometer values sent from the arduino.
+    * Places values in the respective arguments.
+    * Returns zero on success, and negative one otherwise. 
+    */
+    int read_motor_tachometers(long* left_motor_tachometer, long* right_motor_tachometer)
+    {
+        // Retrieve the response.
+        unsigned char response[BUFFER_SIZE] = {0};
+
+        /* Receive tachometer values from the Arduino. 
+        * The message should be in the format LLL,RRR\n  where the LLL represents the 
+        * long integer of the left wheel tachometer and the RRR represents the 
+        * long integer of the right wheel tachometer with both values separated
+        * by a comma character and the message is appended with a newline character '\n'
+        * as shown above.
+        */
+        if (receive_msg(response) != 0)
+        {
+            /* Message was not recieved. */
+            return -1;
+        }
+        //std::cout << response << std::endl;
+
+        int BASE_10 = 10;
+        char *endPtr;
+
+        /* Reset errono to zero. */
+        errno = 0;
+
+        /* Read in the left motor velocity value from the response message. */
+        *left_motor_tachometer = strtol((char*)response, &endPtr, BASE_10);
+
+        if (errno != 0 || (*endPtr) != ',' || endPtr != (char*)response)
+        {
+            /* An error occured when converting, the digits before 
+                * the comma character was not reached, or no conversion was done.
+                */
+            return -1;
+        }
+
+        /* Move to the character that is after the comma character. */
+        endPtr++;
+
+        /* Read in the right motor velocity value from the response message. */
+        *right_motor_tachometer = strtol((char*)response, &endPtr, BASE_10);
+
+        if (errno != 0 || (*endPtr) != '\n' || endPtr != (char*)response)
+        {
+            /* An error occured when converting, the digits before 
+                * the comma character was not reached, or no conversion was done.
+                */
+            return -1;
+        }
+
+        //std::cout << "Tachometer: " << *left_motor_tachometer << "," << *right_motor_tachometer << std::endl;
+
+        /* Successful conversion. */
+        return 0;
+    }
+
+    
+
+    /* Reads in velocity values sent from the arduino.
+    * Places values in the respective arguments.
+    * Returns zero on success, and negative one otherwise. 
+    */
+    int read_motor_velocities(double* left_motor_velocity, double* right_motor_velocity)
+    {
+        // Retrieve the response.
+        unsigned char response[BUFFER_SIZE] = {0};
+
+        /* Receive current velocity from the Arduino. 
+        * The response should be in the format L.L,R.R\n  where the L.L represents the 
+        * floating point number of the left wheel velocity and the R.R represents the 
+        * floating point number of the right wheel velocity with both values separated
+        * by a comma character and the message is appended with a newline character '\n'
+        * as shown above.
+        */
+        if (receive_msg(response) != 0)
+        {
+            /* Message was not recieved. */
+            return -1;
+        }
+
+        //std::cout << response << std::endl;
+
+        char *endPtr;
+
+        /* Reset errono to zero. */
+        errno = 0;
+
+        /* Read in the left motor velocity value from the response message. */
+        *left_motor_velocity = strtod((char*)response, &endPtr);
+
+        if (errno != 0 || (*endPtr) != ',' || endPtr != (char*)response)
+        {
+            /* An error occured when converting, the digits before 
+                * the comma character was not reached, or no conversion was done.
+                */
+            return -1;
+        }
+
+        /* Move to the character that is after the comma character. */
+        endPtr++;
+
+        /* Read in the right motor velocity value from the response message. */
+        *right_motor_velocity = strtod((char*)response, &endPtr);
+
+        if (errno != 0 || (*endPtr) != '\n' || endPtr != (char*)response)
+        {
+            /* An error occured when converting, the digits before 
+                * the comma character was not reached, or no conversion was done.
+                */
+            return -1;
+        }
+        //std::cout << "Velocity: " << *left_motor_velocity << "," << *right_motor_velocity << std::endl;
+
+        /* Successful conversion. */
+        return 0;
     }
 };
 
