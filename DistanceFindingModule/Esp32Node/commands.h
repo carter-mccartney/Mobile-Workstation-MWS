@@ -299,7 +299,7 @@ namespace Esp32Commands
         while(!esp.port->IsDataAvailable()) usleep(1000);
 
       
-        esp.port->ReadLine(calibrationOutput, '\n');
+       
         esp.port->ReadLine(calibrationOutput, '\n'); // Read twice due to ESP#2 bug.
 
         return std::stoi(calibrationOutput);
