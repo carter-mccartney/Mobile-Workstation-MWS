@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MwsCompanionApp.Views.ConnectionView"
+			 xmlns:tabs="http://sharpnado.com"
+			 xmlns:converters="clr-namespace:MwsCompanionApp.Infrastructure"
+			 Loaded="ContentView_Loaded"
+			 BindingContextChanged="ContentView_BindingContextChanged">
+	<ContentView.Resources>
+		<converters:NotConverter x:Key="NotConverter"/>
+	</ContentView.Resources>
+	<Border Padding="20"
+			HorizontalOptions="FillAndExpand"
+			VerticalOptions="FillAndExpand"
+			Margin="5"
+			class="Dark">
+		<Border.StrokeShape>
+			<RoundRectangle CornerRadius="20"/>
+		</Border.StrokeShape>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Label Text="{Binding Name,
+				                  Mode=OneWay, 
+								  UpdateSourceEventName=PropertyChanged}"
+				   HorizontalOptions="Center"
+				   FontSize="25"
+				   Margin="5"/>
+			<Button Text="Disconnect"
+					Clicked="Disconnect_Click"
+					Grid.Row="1"
+					class="Danger"
+					IsEnabled="{Binding IsDoingAnything, 
+									    Mode=OneWay, 
+										UpdateSourceEventName=PropertyChanged,
+										Converter={StaticResource NotConverter}}"/>
+			<Rectangle class="Line"
+					   Grid.Row="2"/>
+			<tabs:ViewSwitcher x:Name="TabView"
+							   Animate="True"
+							   Grid.Row="3"
+							   VerticalOptions="FillAndExpand">
+				<tabs:DelayedView VerticalOptions="Center">
+					<tabs:DelayedView.View>
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="50"/>
+								<RowDefinition Height="*"/>
+								<RowDefinition Height="50"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
+							<Button Text="Follow Me"
+									x:Name="FollowButton"
+									CornerRadius="200"
+									WidthRequest="200"
+									HeightRequest="200"
+									class="Secondary"
+									Clicked="FollowButton_Clicked"
+									IsVisible="{Binding IsFollowing, 
+														Mode=OneWay, 
+														UpdateSourceEventName=PropertyChanged, 
+														Converter={StaticResource NotConverter}}"
+									IsEnabled="{Binding IsDoingAnything, 
+														Mode=OneWay, 
+														UpdateSourceEventName=PropertyChanged, 
+														Converter={StaticResource NotConverter}}"
+									Grid.Row="1"/>
+							<Button Text="Stop Following"
+									x:Name="UnfollowButton"
+									CornerRadius="200"
+									WidthRequest="200"
+									HeightRequest="200"
+									class="Secondary"
+									Clicked="StopFollowingButton_Clicked"
+									IsVisible="{Binding IsFollowing, 
+														Mode=OneWay, 
+														UpdateSourceEventName=PropertyChanged}"
+									Grid.Row="1"/>
+							<Grid Grid.Row="3">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								
+								<Label Text="Range"/>
+								<Slider Grid.Row="3"
+										HorizontalOptions="FillAndExpand"
+										Value="{Binding Range, 
+														Mode=TwoWay, 
+														UpdateSourceEventName=PropertyChanged}"
+										DragCompleted="Range_Updated"
+										Maximum="10"
+										Minimum="1"
+										class="Secondary"
+										Grid.Column="1"/>
+							</Grid>
+						</Grid>
+					</tabs:DelayedView.View>
+				</tabs:DelayedView>
+				<!--<tabs:DelayedView VerticalOptions="Center"
+								  IsVisible="False">
+					<tabs:DelayedView.View>
+						<VerticalStackLayout>
+							<Entry Text="{Binding Name, 
+												  Mode=TwoWay, 
+												  UpdateSourceEventName=PropertyChanged}"
+								   HorizontalTextAlignment="Center"/>
+							<Button Text="Submit"/>
+						</VerticalStackLayout>
+					</tabs:DelayedView.View>
+				</tabs:DelayedView>-->
+				<tabs:DelayedView VerticalOptions="Center"
+								  IsVisible="False">
+					<tabs:DelayedView.View>
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="50"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="300"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
+							<Label Text="Stand exactly one meter away from the selected sensor to calibrate with nothing in between yourself and the sensor."
+								   HorizontalTextAlignment="Center"/>
+							<Label Text="Back"
+								   HorizontalTextAlignment="Center"
+								   Grid.Row="2"/>
+							<Border Padding="5"
+									HorizontalOptions="FillAndExpand"
+									Grid.Row="3">
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="*"/>
+										<RowDefinition Height="*"/>
+										<RowDefinition Height="*"/>
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="*"/>
+									</Grid.ColumnDefinitions>
+
+									<Button Text="Three"
+											WidthRequest="95"
+											HeightRequest="95"
+											class="Secondary"
+											Clicked="Calibrate3_Clicked"
+											IsEnabled="{Binding IsDoingAnything, 
+														        Mode=OneWay, 
+														        UpdateSourceEventName=PropertyChanged, 
+														        Converter={StaticResource NotConverter}}"
+											Margin="5"/>
+									<Button Grid.Column="2"
+											Text="Four"
+											WidthRequest="95"
+											HeightRequest="95"
+											class="Secondary"
+											Clicked="Calibrate4_Clicked"
+											IsEnabled="{Binding IsDoingAnything, 
+														        Mode=OneWay, 
+														        UpdateSourceEventName=PropertyChanged, 
+														        Converter={StaticResource NotConverter}}"
+											Margin="5"/>
+									<Button Grid.Row="2"
+											Text="One"
+											WidthRequest="95"
+											HeightRequest="95"
+											class="Secondary"
+											Clicked="Calibrate1_Clicked"
+											IsEnabled="{Binding IsDoingAnything, 
+														        Mode=OneWay, 
+														        UpdateSourceEventName=PropertyChanged, 
+														        Converter={StaticResource NotConverter}}"
+											Margin="5"/>
+									<Button Grid.Row="2"
+											Grid.Column="2"
+											Text="Two"
+											WidthRequest="95"
+											HeightRequest="95"
+											class="Secondary"
+											Clicked="Calibrate2_Clicked"
+											IsEnabled="{Binding IsDoingAnything, 
+														        Mode=OneWay, 
+														        UpdateSourceEventName=PropertyChanged, 
+														        Converter={StaticResource NotConverter}}"
+											Margin="5"/>
+								</Grid>
+							</Border>
+							<Label Text="Front"
+								   HorizontalTextAlignment="Center"
+								   Grid.Row="4"/>
+						</Grid>
+					</tabs:DelayedView.View>
+				</tabs:DelayedView>
+			</tabs:ViewSwitcher>
+			<Rectangle class="Line"
+					   Grid.Row="4"/>
+			<tabs:TabHostView BindingContext="{x:Reference TabView}"
+							  SelectedIndex="{Binding SelectedIndex, 
+													  Mode=TwoWay}"
+							  Grid.Row="5"
+							  TabType="Fixed"
+							  CornerRadius="10"
+							  HeightRequest="50"
+							  IsSegmented="True"
+							  SegmentedHasSeparator="True">
+				<tabs:SegmentedTabItem Label="Follow"
+									   SelectedTabColor="White"/>
+				<!--<tabs:SegmentedTabItem Label="Manage"
+									   IsVisible="False"
+									   IsEnabled="{Binding IsDoingAnything, 
+														   Mode=OneWay, 
+														   UpdateSourceEventName=PropertyChanged, 
+														   Converter={StaticResource NotConverter}}"/>-->
+				<tabs:SegmentedTabItem Label="Calibration"
+									   SelectedTabColor="White"/>
+			</tabs:TabHostView>
+		</Grid>
+	</Border>
+</ContentView>

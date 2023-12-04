@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+  For instructions on using Groot and description of the following BehaviorTree nodes,
+  please refer to the groot_instructions.md and REAMDE.md respectively located in the
+  nav2_behavior_tree package.
+-->
+<root>
+  <TreeNodesModel>
+
+    <Action ID="TruncatePathCustom">
+        <input_port name="distance">Distance before goal to truncate</input_port>
+        <input_port name="input_path">Path to truncate</input_port>
+        <output_port name="output_path">Truncated path to utilize</output_port>
+    </Action>
+
+    <Decorator ID="RangeUpdater">
+      <input_port name="input_range">Original range in</input_port>
+      <output_port name="output_range">Output range set by subscription</output_port>
+    </Decorator>
+
+  </TreeNodesModel>
+</root>
