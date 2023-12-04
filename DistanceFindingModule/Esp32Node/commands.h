@@ -29,12 +29,18 @@ namespace Esp32Commands
             {
                 for(auto de : fs::directory_iterator(p))
                 {
-                    if(is_symlink(de.symlink_status()))
+                    std::string fileName = de.path().filename().string();
+                    std::cout << fileName << std::endl;
+
+                    if(fileName != "usb-Arduino__www.arduino.cc__0042_5593034353635170C0D0-if00" &&
+                       fileName != "usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0")
                     {
-                        fs::path symlink_points_at = read_symlink(de);
-                        fs::path canonical_path = fs::canonical(p / symlink_points_at);
-                        // cout << canonical_path.generic_string() << std::endl;
-                        port_names.push_back(canonical_path.generic_string());
+                        if(is_symlink(de.symlink_status()))
+                        {
+                            fs::path symlink_points_at = read_symlink(de);
+                            fs::path canonical_path = fs::canonical(p / symlink_points_at);
+                            port_names.push_back(canonical_path.generic_string());
+                        }
                     }
                 }
             }
@@ -299,7 +305,6 @@ namespace Esp32Commands
         while(!esp.port->IsDataAvailable()) usleep(1000);
 
       
-        esp.port->ReadLine(calibrationOutput, '\n');
         esp.port->ReadLine(calibrationOutput, '\n'); // Read twice due to ESP#2 bug.
 
         return std::stoi(calibrationOutput);

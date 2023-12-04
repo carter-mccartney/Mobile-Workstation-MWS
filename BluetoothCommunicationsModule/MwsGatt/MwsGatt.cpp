@@ -680,7 +680,7 @@ void gattMain()
 	uint8_t currentIteration = 0;
 	while (ggkGetServerRunState() < EStopping)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(15));
+		std::this_thread::sleep_for(std::chrono::seconds(60));
 
 		// Update GATT server state.
 		if(getActiveConnections() == 0)
@@ -698,21 +698,21 @@ void gattMain()
 				if(isAwaitingAcknowledge)
 				{
 					cyclesSinceAcknowledge++;
-					if(cyclesSinceAcknowledge > 20)
+					if(cyclesSinceAcknowledge > 1)
 					{
-						cyclesSinceAcknowledge = 0;
-						isAwaitingAcknowledge = false;
-						ggkNofifyUpdatedCharacteristic("/com/gobbledegook/follower/change_advertisement");
+						// cyclesSinceAcknowledge = 0;
+						// isAwaitingAcknowledge = false;
+						// ggkNofifyUpdatedCharacteristic("/com/gobbledegook/follower/change_advertisement");
 					}
 				}
 				else
 				{
 					// Check whether to request a new advertisement.
 					currentIteration++;
-					if(currentIteration % 1 == 0)
+					if(currentIteration % 5 == 0)
 					{
 						// Change the current advertisement.
-						ggkNofifyUpdatedCharacteristic("/com/gobbledegook/follower/change_advertisement");
+						// ggkNofifyUpdatedCharacteristic("/com/gobbledegook/follower/change_advertisement");
 					}
 				}
 			}
