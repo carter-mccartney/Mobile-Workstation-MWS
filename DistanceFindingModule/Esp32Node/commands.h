@@ -106,7 +106,7 @@ namespace Esp32Commands
                     string line = listOfPorts[i];
 
                     // ESP32 has a bug in serial communications, so read to the end of the line to get the data we actually want.
-                    esp.port->ReadLine(line, '\n');
+                    //esp.port->ReadLine(line, '\n');
                     esp.port->ReadLine(line, '\n');
 		    printf("Returned %s\n", line.c_str());
 
@@ -195,24 +195,24 @@ namespace Esp32Commands
 
 
         // Read the result from each.
-        usleep(12000000);//sleep for the appropriate time 
+        usleep(4000000);//sleep for the appropriate time 
         string distanceString;
-        esps[0].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
+        //esps[0].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
         while(!esps[0].port->IsDataAvailable()) usleep(10000);
 
         esps[0].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance1 = std::stod(distanceString);
-        esps[1].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
+        //esps[1].port->ReadLine(distanceString, '\n'); //add in a clear and check for each 
         while(!esps[1].port->IsDataAvailable()) usleep(10000);
         
         esps[1].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance2 = std::stod(distanceString);
-        esps[2].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
+        //esps[2].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
         while(!esps[2].port->IsDataAvailable()) usleep(10000);
        
         esps[2].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
         double distance3 = std::stod(distanceString);
-        esps[3].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
+        //esps[3].port->ReadLine(distanceString, '\n'); //add in a clear and check for each
         while(!esps[3].port->IsDataAvailable()) usleep(10000);
        
         esps[3].port->ReadLine(distanceString, '\n'); // Read twice due to ESP32 bug.
@@ -300,9 +300,9 @@ namespace Esp32Commands
         esp.port->FlushIOBuffers();
         esp.port->Write("CALIBRATE\n");
         string calibrationOutput;
-        esp.port->ReadLine(calibrationOutput, '\n');
-        usleep(40000000);//sleep for longer.
-        while(!esp.port->IsDataAvailable()) usleep(1000);
+        //esp.port->ReadLine(calibrationOutput, '\n');
+        usleep(10000000);//sleep for longer.
+        //while(!esp.port->IsDataAvailable()) usleep(1000);
 
       
         esp.port->ReadLine(calibrationOutput, '\n'); // Read twice due to ESP#2 bug.
