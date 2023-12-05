@@ -120,7 +120,7 @@ public:
             // TODO: Light indicator that tells the user of the MWS that the Raspberry Pi is not connected to the Arduino.
 
             /* Failed to find the arduino serial port. */
-            return true;
+            return false; // CHANGE: from true to false. surely this should be false.
         }
 
         /* Successfully connected to the arduino serial port. */
@@ -167,6 +167,27 @@ public:
         std::stringstream ss;
         ss << "V" << left_motor_rpm << "," << right_motor_rpm << "\n";
         this->send_msg(ss.str());
+    }
+
+    /*
+    *  This command will receive input as a single character for directions
+    *  that we want to drive the MWS:
+    *       F - forward
+    *       B - backward
+    *       L - left
+    *       R - right
+    *  It will drive the MWS in that direction by calling the "set_motor_values"
+    *  function with values based on the desired direction of travel.
+    */
+    void update_mws_presentation_drive_control(char direction)
+    {
+        switch
+        {
+            case ('F'): set_motor_values(0.25, 0.25); break;        // Forward:     move both motors 0.25 m/s
+            case ('B'): set_motor_values(0.25, 0.25); break;        // Backward:    move both motors 0.25 m/s
+            case ('L'): set_motor_values(-0.25, 0.25); break;       // Left:        move both motors 0.25 m/s
+            case ('R'): set_motor_values(0.25, -0.25); break;       // Right:       move both motors 0.25 m/s
+        }
     }
 
     /* Reads in tachometer values sent from the arduino.
