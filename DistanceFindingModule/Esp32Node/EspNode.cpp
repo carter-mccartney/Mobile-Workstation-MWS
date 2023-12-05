@@ -51,6 +51,7 @@ public:
 		this->isCalibratingSubscriber = this->create_subscription<example_interfaces::msg::Bool>("is_calibrating", 10, std::bind(&Esp32Driver::onCalibrationStarted, this, _1));
 		this->isCalibratingPublisher = this->create_publisher<example_interfaces::msg::Bool>("is_calibrating_return", 10);
 		this->targetSubscriber = this->create_subscription<example_interfaces::msg::UInt8>("calibration_target", 10, std::bind(&Esp32Driver::targetChanged, this, _1));
+        this->counterValue = 0;
 
         // Create transform buffer and listener.
         this->tfBuffer = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -92,7 +93,19 @@ public:
     {
         return this->tfBuffer->transform<geometry_msgs::msg::PoseStamped>(pose, newPose, frame_id, timeout);
     }
-
+    //this below is used to stop multiple bad data points from the ESP32's
+    void increaseCounter()
+    {
+        this->counterValue++;
+    }
+    int getCounterValue()
+    {
+        return this->counterValue;
+    }
+    void resetCounter()
+    {
+        this->counterValue = 0;
+    }
 private:
     // The publisher of the user's location.
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisherLocation;
@@ -150,6 +163,8 @@ private:
 
     // The current target of calibration.
     uint8_t calibrationTarget;
+    
+    int counterValue;
 
     // Updates the signature of the user.
     void singatureChanged(const example_interfaces::msg::String& msg)
@@ -246,29 +261,41 @@ void getPosition()
         std::cout << "Found x value " << goal.x << "\n";
         std::cout << "Found y value " << goal.y <<"\n";
         // Adjust to the rotation of the coordinate system.
-        geometry_msgs::msg::PoseStamped pose;
-        pose.header.frame_id = "base_link";
-        pose.pose.position.x = goal.x;
-        pose.pose.position.y = goal.y;
-        pose.pose.position.z = 0;
-
-        // Point to user.
-        tf2::Quaternion q;
-        double angle = atan2(goal.y, goal.x);
-        if(angle < 0) 
+        //needs to use old values if it returns 0
+        if (( - 0.05 <= goal.x <= 0.050 && (-0.05 <= goal.y && node->getCounterValue() < 10)
         {
-            angle += 2 * Mapping::PI;
+            node->increaseCounter();
+
+            node->publishGoal();
         }
-        q.setRPY(0, 0, angle);
-        q.normalize();
-        pose.pose.orientation = tf2::toMsg(q);
+        else
+        {
+            node->resetCounter();
+			geometry_msgs::msg::PoseStamped pose;
+			pose.header.frame_id = "base_link";
+			pose.pose.position.x = goal.x;
+			pose.pose.position.y = goal.y;
+			pose.pose.position.z = 0;
 
-        // Compute the transform.
-        geometry_msgs::msg::PoseStamped newPose;
-        newPose = node->transformPose(pose, newPose, "odom", tf2::durationFromSec(1000));
+			// Point to user.
+			tf2::Quaternion q;
+			double angle = atan2(goal.y, goal.x);
+			if (angle < 0)
+			{
+				angle += 2 * Mapping::PI;
+			}
+			q.setRPY(0, 0, angle);
+			q.normalize();
+			pose.pose.orientation = tf2::toMsg(q);
 
-        // Save the new goal.
-        node->setGoal(newPose);
+			// Compute the transform.
+			geometry_msgs::msg::PoseStamped newPose;
+			newPose = node->transformPose(pose, newPose, "odom", tf2::durationFromSec(1000));
+
+			// Save the new goal.
+			node->setGoal(newPose);
+        }
+
     }
 }
 
