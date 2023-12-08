@@ -262,7 +262,7 @@ void getPosition()
         std::cout << "Found y value " << goal.y <<"\n";
         // Adjust to the rotation of the coordinate system.
         //needs to use old values if it returns 0
-        if (( - 0.05 <= goal.x <= 0.050 && (-0.05 <= goal.y && node->getCounterValue() < 10)
+        if (( - 0.05 <= goal.x <= 0.05 && (-0.05 <= goal.y <= 0.05) && node->getCounterValue() < 10))
         {
             node->increaseCounter();
 
