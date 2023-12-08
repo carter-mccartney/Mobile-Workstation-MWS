@@ -208,77 +208,20 @@ void loop() {
     }
   } // end "if Serial3.available"
 
+  // --------------------------------------------------------------- SET MOTOR SPEEDS -------------------------------------------------------------
   if (vel_count <= VEL_COUNTS_MAX)
   {
-    // 4 - update the speed: 0 = set brake current ; <500 = output message because something is not right. We aren't setting duty cycle anymore ; >=500 = setRPM   
-    if (left_motor_erpm == 0) 
+    // set motor velocities
+    if (!(left_motor_erpm < VEL_MAX_NEG || left_motor_erpm > VEL_MAX) && !(right_motor_erpm < VEL_MAX_NEG || right_motor_erpm > VEL_MAX))
     {
-      // TODO MAYBE :: SETUP STEP DOWN FOR BRAKING IF IT JOLTS WHEN BRAKES ARE APPLIED
-      // if the motor is already set to velocty=0, then set the brakeCurrent to 0 so that the motors do not spin and no current is applied to lock the motors
-      if (left_motor_erpm_current == 0)
-      {
-        LeftMotor.setBrakeCurrent(0); // This will keep the motors from moving, yet leave them free to move by the user
-      }
-      else // the left motor is currently moving, so make it brake
-      {
-        LeftMotor.setBrakeCurrent(5); // This immediately applies brake current
-      }
-
-      // adjust the current motor rpm variable to reflect it's new value
-      left_motor_erpm_current = left_motor_erpm;
-    }
-    else // set the new left motor velocity that is nonzero
-    {
-      // if the new speed is between +-max negative velocity
-      if (!(left_motor_erpm > VEL_MIN_NEG && left_motor_erpm < VEL_MIN)) 
-      {
-        // if the new speed is less than max negative or greater than max.
-        if (!(left_motor_erpm < VEL_MAX_NEG || left_motor_erpm > VEL_MAX))
-        {
-          // TODO :: ===>> if the difference between the current velocity and new velocity is greater than 47, then step up
-          LeftMotor.setRPM(left_motor_erpm);
-          left_motor_erpm_current = left_motor_erpm;
-        }
-        //else Serial.println("Left motor velocity was either greater than max or less than neg max.");//LeftMotor.setDuty(left_motor_erpm / (9.5 * 1600)); // dutycycle: [r = 1600x], where 'r' is rpm and 'x' is duty cycle
-      }
-      //else Serial.println("Left motor velocity was between min and min neg.");//LeftMotor.setDuty(left_motor_erpm / (9.5 * 1600)); // dutycycle: [r = 1600x], where 'r' is rpm and 'x' is duty cycle
-    }
-
-    // 4 - update the speed of the right motor
-    if (right_motor_erpm == 0) 
-    {
-      // TODO MAYBE :: SETUP STEP DOWN FOR BRAKING IF IT JOLTS WHEN BRAKES ARE APPLIED
-      // if the motor is already set to velocty=0, then set the brakeCurrent to 0 so that the motors do not spin and no current is applied to lock the motors
-      if (right_motor_erpm_current == 0)
-      {
-        RightMotor.setBrakeCurrent(0); // This will keep the motors from moving, yet leave them free to move by the user
-      }
-      else // the right motor is currently moving, so make it brake
-      {
-        RightMotor.setBrakeCurrent(5); // This immediately applies brake current
-      }
-
-      // adjust the current motor rpm variable to reflect it's new value
+      LeftMotor.setRPM(left_motor_erpm);
+      RightMotor.setRPM(right_motor_erpm);
       right_motor_erpm_current = right_motor_erpm;
-    }
-    else // set the new right motor velocity that is nonz
-      // if the new speed is between +-max negative velocity
-      if (!(left_motor_erpm > VEL_MIN_NEG && left_motor_erpm < VEL_MIN)) 
-      {
-        // if the new speed is less than max negative or greater than max.
-        if (!(left_motor_erpm < VEL_MAX_NEG || left_motor_erpm > VEL_MAX))
-        {
-          RightMotor.setRPM(right_motor_erpm);
-          right_motor_erpm_current = right_motor_erpm;
-        }
-        //else Serial.println("Right motor velocity was either greater than max or less than neg max.");//LeftMotor.setDuty(left_motor_erpm / (9.5 * 1600)); // dutycycle: [r = 1600x], where 'r' is rpm and 'x' is duty cycle
-      }
-      //else Serial.println("Right motor velocity was between min and min neg.");//LeftMotor.setDuty(left_motor_erpm / (9.5 * 1600)); // dutycycle: [r = 1600x], where 'r' is rpm and 'x' is duty cycle
-    }
+      left_motor_erpm_current = left_motor_erpm;
 
-    //Serial.print(left_motor_erpm); Serial.print(" "); Serial.print(right_motor_erpm); Serial.println(""); // Used for debugging executed rpm values.
-   // Serial.print(left_motor_tachometer_offset); Serial.print(" "); Serial.print(right_motor_tachometer_offset); Serial.println(""); // Used for debugging current velocity (m/s) values.
-
+      if (left_motor_erpm == 0) LeftMotor.setBrakeCurrent(5);
+      if (right_motor_erpm == 0) RightMotor.setBrakeCurrent(5);
+    }
   } // end of update speed (if vel_count <= VEL_COUNTS_MAX)
   // -------------------------------- END OF Adjust motor velocities (left & right) ------------------------------ 
 
@@ -290,4 +233,4 @@ void loop() {
   Serial3.println("Right Motor erpm : "); Serial3.print(RightMotor.data.rpm);
   */
 
- // end loop
+} // end loop
